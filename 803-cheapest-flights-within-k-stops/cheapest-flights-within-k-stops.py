@@ -8,10 +8,9 @@ class Solution:
             for _ in range(k+1):
                 temp = minDist.copy()
                 for u,v,w in flights:
-                    if minDist[u] != float('inf') and minDist[u]+w < temp[v]:
-                        temp[v] = minDist[u]+w
-                minDist = temp
-
+                    if temp[u] != float('inf') and temp[u]+w < minDist[v]:
+                        minDist[v] = temp[u]+w
+                        
             if minDist[dst] == float('inf'):
                 return -1
             return minDist[dst]
