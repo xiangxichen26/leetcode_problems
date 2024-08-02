@@ -1,31 +1,12 @@
 class Solution:
     def maximumImportance(self, n: int, roads: List[List[int]]) -> int:
-        # build a graph
-        graph = dict()
-        for i in range(n):
-            graph[i] = 0
-
-        # calcuate the edges
-        for u,v in roads:
-            graph[u] = graph.get(u) + 1
-            graph[v] = graph.get(v) + 1
-
-        hp = []
-        for i in range(n):
-            heapq.heappush(hp,(graph[i],i))
+        Arr = [0] * n  # i-th city has Arr[i] roads
+        for A,B in roads:
+            Arr[A] += 1 # Each road increase the road count
+            Arr[B] += 1
+        Arr.sort()  # Cities with most road should receive the most score
+        summ = 0
+        for i in range(len(Arr)):
+            summ += Arr[i] * (i+1)  # Multiply city roads with corresponding score
         
-        i = 1
-        while hp:
-            n,node = heapq.heappop(hp)
-            graph[node] = i
-            i += 1
-        
-        ans = 0
-        for u,v in roads:
-            ans = ans + graph[u]+ graph[v]
-        
-        return ans
-
-
-
-
+        return summ
