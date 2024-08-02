@@ -14,12 +14,10 @@ class Solution:
         for i in range(n):
             heapq.heappush(hp,(graph[i],i))
         
-        i = 1
         ans = 0
-        while hp:
+        for i in range(n):
             n,node = heapq.heappop(hp)
-            ans = ans + graph[node] * i 
-            i += 1
+            ans = ans + graph[node] * (i+1)
         
         return ans
 
