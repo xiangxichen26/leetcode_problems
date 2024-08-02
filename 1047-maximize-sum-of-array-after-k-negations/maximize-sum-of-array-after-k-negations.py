@@ -9,10 +9,8 @@ class Solution:
             else: 
                 break
         
-        nums.sort()
         if k > 0 and k % 2 != 0:
+            nums.sort()
             nums[0] = -nums[0]
         
         return sum(nums)
-
-                
