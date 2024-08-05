@@ -10,5 +10,5 @@ class Solution:
                 if k == 0 :
                     return i
 
-        if k>0:
+        if k > 0:
             return "" 
