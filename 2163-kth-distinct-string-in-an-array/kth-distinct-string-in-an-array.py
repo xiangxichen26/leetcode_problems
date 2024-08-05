@@ -4,11 +4,12 @@ class Solution:
         for i in arr:
             arr_d[i] = arr_d.get(i,0) + 1
         
+        count = 0
         for i in arr_d:
             if arr_d[i] == 1:
-                k -= 1
-                if k == 0 :
+                count += 1
+                if count == k:
                     return i
 
-        if k > 0:
+        if count < k:
             return "" 
