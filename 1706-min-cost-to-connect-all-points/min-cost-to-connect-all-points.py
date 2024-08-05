@@ -1,37 +1,58 @@
+class UnionFind:
+    def __init__(self, n:int):
+        self.parent = [i for i in range(n)]
+        self.count = n
+    
+    def find(self,x):
+        if self.parent[x] != x:
+		        # generation compression
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+    
+    def union(self,x,y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+        if root_x == root_y:
+            return
+        
+        self.parent[root_x] = root_y
+        self.count -= 1
+    
+    def is_connected(self,x,y):
+        return self.find(x) == self.find(y)
+
 class Solution:
     def m_distance(self, x1, x2):
         return abs(x1[0]-x2[0]) + abs(x1[1]-x2[1])
     
-    def prim(self, n:int, graph:dict) -> int:
-        visited = [False] * n
-        hp = []
-        heapq.heappush(hp,(0,0))
+    def kruskal(self, n:int, edges: list) -> int:
+        union_find = UnionFind(n)
+
+        edges.sort(key=lambda x:x[2])
         ans = 0
+        count = 0
 
-        while hp:
-            w,node = heapq.heappop(hp)
-
-            if visited[node]:
+        for u,v,w in edges:
+            if union_find.is_connected(u, v):
                 continue
-            visited[node] = True
+            
             ans += w
-
-            for nei_w,nei in graph[node]:
-                if not visited[nei]:
-                    heapq.heappush(hp,(nei_w,nei))
+            count += 1
+            union_find.union(u, v)
+            
+            if count == n-1:
+                return ans
         
         return ans
 
-
     def minCostConnectPoints(self, points: List[List[int]]) -> int:
         n = len(points)
-        graph = collections.defaultdict(list)
+        edges = []
 
         for i in range(n):
             for j in range(i+1,n):
                 d = self.m_distance(points[i], points[j])
-                graph[i].append((d, j))
-                graph[j].append((d, i))
+                edges.append([i,j,d])
         
-        return self.prim(n,graph)
+        return self.kruskal(n,edges)
         
