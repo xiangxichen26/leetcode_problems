@@ -27,17 +27,18 @@ class Solution:
         size = row_size * col_size
         edges = []
 
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]  # Directions: down, up, right, left
-
         for row in range(row_size):
             for col in range(col_size):
-                current = row * col_size + col
-                for dr, dc in directions:
-                    new_row, new_col = row + dr, col + dc
-                    if 0 <= new_row < row_size and 0 <= new_col < col_size:
-                        neighbor = new_row * col_size + new_col
-                        diff = abs(heights[row][col] - heights[new_row][new_col])
-                        edges.append([current, neighbor, diff])
+                if row < row_size - 1:
+                    x = row * col_size + col
+                    y = (row + 1) * col_size + col
+                    h = abs(heights[row][col] - heights[row + 1][col])
+                    edges.append([x, y, h])
+                if col < col_size - 1:
+                    x = row * col_size + col
+                    y = row * col_size + col + 1
+                    h = abs(heights[row][col] - heights[row][col + 1])
+                    edges.append([x, y, h])
         
         edges.sort(key=lambda x: x[2])
         union_find = UnionFind(size)
