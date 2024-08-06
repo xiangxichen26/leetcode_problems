@@ -1,24 +1,17 @@
 class Solution:
-    def minimumPushes(self, word: str) -> int:
-        # count the frequency of each characters in the word
-        letter_counts = {chr(i): 0 for i in range(ord('a'), ord('z') + 1)}
-        for i in word:
-            letter_counts[i] = letter_counts.get(i) + 1
-
-        # sorted the frequency of each characters
-        letter_counts = dict(sorted(letter_counts.items(), key=lambda item: item[1], reverse=True))
+    def minimumPushes(self, input_text: str) -> int:
+        # Count letter occurrences
+        letter_counts = [0] * 26
+        for char in input_text:
+            letter_counts[ord(char) - ord('a')] += 1
         
-        # assign letter to the key pad and count the push times
-        ans = 0
-        count = 0 
-        time = 1
-        for j in letter_counts:
-            if letter_counts[j] == 0:
+        # Sort counts in descending order
+        sorted_counts = sorted(letter_counts, reverse=True)
+        
+        total_key_presses = 0
+        for index, count in enumerate(sorted_counts):
+            if count == 0:
                 break
-            else:
-                count += 1
-                ans =  ans + letter_counts[j] * time
-                if count == 8:
-                    time += 1
-                    count = 0 
-        return ans
+            total_key_presses += (index // 8 + 1) * count
+        
+        return total_key_presses
