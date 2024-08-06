@@ -4,18 +4,23 @@
 #         self.val = val
 #         self.left = left
 #         self.right = right
+# use Stack
 class Solution:
     def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
-        res= []
+        if not root:
+            return []
+        
+        stack =[root]
+        res=[]
 
-        def postOrder(root: TreeNode):
-            if not root:
-                return
+        while stack:
+            n = stack.pop()
+            res.append(n.val)
+            if n.left:
+                stack.append(n.left)
+            if n.right:
+                stack.append(n.right)
             
-            postOrder(root.left)
-            postOrder(root.right)
-            res.append(root.val)
-        
-        postOrder(root)
-        return res
-        
+
+        return res[::-1]
+            
