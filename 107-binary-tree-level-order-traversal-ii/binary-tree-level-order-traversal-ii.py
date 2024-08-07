@@ -23,6 +23,6 @@ class Solution:
                 if cur.right:
                     queue.append(cur.right)
             
-            res.append(level)
+            res.insert(0,level)
 
-        return res[::-1]
+        return res
