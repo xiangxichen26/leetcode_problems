@@ -8,15 +8,17 @@ class Node:
 
 class Solution:
     def postorder(self, root: 'Node') -> List[int]:
+        if not root:
+            return []
+        
         res = []
+        stack = [root]
         
-        def post(root):
-            if not root:
-                return
-            
-            for i in root.children:
-                post(i)
-            res.append(root.val)
-        
-        post(root)
-        return res
+        while stack:
+            n= stack.pop()
+            res.append(n.val)
+
+            for i in n.children:
+                stack.append(i)
+
+        return res[::-1]
