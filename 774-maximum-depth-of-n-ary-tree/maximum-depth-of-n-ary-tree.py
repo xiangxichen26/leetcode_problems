@@ -8,18 +8,19 @@ class Node:
 
 class Solution:
     def maxDepth(self, root: 'Node') -> int:
-        if not root:
-            return 0
-        
-        queue = collections.deque([root])
-        ans = 0
-        while queue:
-            for _ in range(len(queue)):
-                cur = queue.popleft()
 
-                for i in cur.children:
-                    queue.append(i)
-                    
-            ans += 1
-        return ans
+        def getDepth(root) -> int:
+            if not root:
+                return 0
+            
+            height = 0
+            for i in root.children:
+                new_height = getDepth(i)
+                if new_height > height:
+                    height = new_height
+            
+            return height + 1
         
+        return getDepth(root)
+        
+    
