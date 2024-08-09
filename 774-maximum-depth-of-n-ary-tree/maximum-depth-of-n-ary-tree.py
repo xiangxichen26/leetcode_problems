@@ -8,19 +8,14 @@ class Node:
 
 class Solution:
     def maxDepth(self, root: 'Node') -> int:
-
-        def getDepth(root) -> int:
-            if not root:
-                return 0
-            
-            height = 0
-            for i in root.children:
-                new_height = getDepth(i)
-                if new_height > height:
-                    height = new_height
-            
-            return height + 1
+        if not root:
+            return 0
         
-        return getDepth(root)
+        max_depth = 1
+        
+        for child in root.children:
+            max_depth = max(max_depth, self.maxDepth(child) + 1)
+        
+        return max_depth
         
     
