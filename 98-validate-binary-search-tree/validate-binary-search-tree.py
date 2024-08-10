@@ -6,20 +6,21 @@
 #         self.right = right
 class Solution:
     def isValidBST(self, root: Optional[TreeNode]) -> bool:
-        if not root:
+        def inorder(node, min_x, max_x) -> bool:
+            if not node:
+                return True
+            
+            if not inorder(node.left, min_x, node.val):
+                return False
+            
+            if node.val <= min_x or node.val >= max_x:
+                return False
+
+            if not inorder(node.right, node.val, max_x):
+                return False
+
             return True
         
-        queue = collections.deque([(root, float('-inf'), float('inf'))])
+        return inorder(root,float("-inf"),float("inf"))
 
-        while queue:
-            for _ in range(len(queue)):
-                cur, min_x, max_x = queue.popleft()
-
-                if cur.val >= max_x or cur.val <= min_x:
-                    return False
-                
-                if cur.left:
-                    queue.append((cur.left, min_x, cur.val))
-                if cur.right:
-                    queue.append((cur.right, cur.val, max_x))
-        return True
+        
