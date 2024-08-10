@@ -6,18 +6,20 @@
 #         self.right = right
 class Solution:
     def isValidBST(self, root: Optional[TreeNode]) -> bool:
-        def postorderTraversal(root, min_v, max_v):
-            if root == None:
-                return True
-            
-            if not postorderTraversal(root.left, min_v, root.val):
-                return False
-
-            if not postorderTraversal(root.right, root.val, max_v):
-                return False
-            
-            if root.val >= max_v or root.val <= min_v:
-                return False
+        if not root:
             return True
+        
+        queue = collections.deque([(root, float('-inf'), float('inf'))])
 
-        return postorderTraversal(root, float('-inf'), float('inf'))
+        while queue:
+            for _ in range(len(queue)):
+                cur, min_x, max_x = queue.popleft()
+
+                if cur.val >= max_x or cur.val <= min_x:
+                    return False
+                
+                if cur.left:
+                    queue.append((cur.left, min_x, cur.val))
+                if cur.right:
+                    queue.append((cur.right, cur.val, max_x))
+        return True
