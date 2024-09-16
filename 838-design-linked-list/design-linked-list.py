@@ -6,16 +6,16 @@ class MyLinkedNode:
 class MyLinkedList:
 
     def __init__(self):
-        self._first = ListNode(0)
+        self._first = None
         self._len = 0
         
     def get(self, index: int) -> int:
         if index < 0 or index >= self._len:
             return -1
-        cur = self._first
-        for _ in range(index+1):
-            cur = cur.next
         
+        cur = self._first
+        for _ in range(index):
+            cur = cur.next
         return cur.val
 
     def addAtHead(self, val: int) -> None:
@@ -28,29 +28,36 @@ class MyLinkedList:
         if index > self._len:
             return
 
-        if index < 0 :
-            index = 0  
-        
         self._len += 1
-        pre = self._first
-        for _ in range(index):
-            pre = pre.next
+        new_node = MyLinkedNode(val)
+        # Insert at head
+        if index <= 0:
+            new_node.next = self._first
+            self._first = new_node
         
-        node = MyLinkedNode(val)
-        node.next = pre.next
-        pre.next = node
+        else:
+            pre = self._first
+            for _ in range(index-1):
+                pre = pre.next
+            
+            new_node.next = pre.next
+            pre.next = new_node
+        
 
     def deleteAtIndex(self, index: int) -> None:
         if index < 0 or index >= self._len:
             return
         
         self._len -= 1
-        pre = self._first
-
-        for _ in range(index):
-            pre = pre.next
         
-        pre.next =  pre.next.next
+        if index == 0:
+            self._first = self._first.next
+        else:
+            pre = self._first
+            for _ in range(index-1):
+                pre = pre.next
+            
+            pre.next = pre.next.next
 
 
 # Your MyLinkedList object will be instantiated and called as such:
