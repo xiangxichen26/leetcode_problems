@@ -1,18 +1,15 @@
 class Solution:
     def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
-        dict1 = collections.defaultdict()
-        dict2 = collections.defaultdict()
-
-        res = []
-
-        for i in nums1:
-            dict1[i] = dict1.get(i,0)+1
-        for i in nums2:
-            dict2[i] = dict2.get(i,0)+1
-
-        for i in dict1:
-            if i in dict2:
-                res.append(i)
+    # 使用哈希表存储一个数组中的所有元素
+        table = {}
+        for num in nums1:
+            table[num] = table.get(num, 0) + 1
         
-        return res
-            
+        # 使用集合存储结果
+        res = set()
+        for num in nums2:
+            if num in table:
+                res.add(num)
+                del table[num]
+        
+        return list(res)
