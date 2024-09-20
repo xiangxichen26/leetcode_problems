@@ -1,20 +1,12 @@
 class Solution:
     def isAnagram(self, s: str, t: str) -> bool:
-        dicts = collections.defaultdict()
+        from collections import defaultdict
         
-        for i in s:
-            dicts[i] = dicts.get(i,0) + 1
-           
-        for i in t:
-            if i not in dicts:
-                return False
-            else:
-                dicts[i] = dicts.get(i) - 1
-                if dicts[i] == 0:
-                    del dicts[i]
-
-        if dicts:
-            return False
-        else:
-            return True
-                
+        s_dict = defaultdict(int)
+        t_dict = defaultdict(int)
+        for x in s:
+            s_dict[x] += 1
+        
+        for x in t:
+            t_dict[x] += 1
+        return s_dict == t_dict
