@@ -5,4 +5,4 @@ class Solution:
         """
         n = len(nums)
         k = k % n
-        nums[:] = nums[n-k:n] + nums[:n-k]
+        nums[:] = nums[-k:] + nums[:-k]
