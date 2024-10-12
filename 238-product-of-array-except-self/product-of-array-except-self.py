@@ -20,9 +20,9 @@ class Solution:
             b = L0238(nums, ans, work, "Brute Force")
         if False:  # Change to True to activate Use Division
             b = L0238(nums, ans, work, "Use Division")
-        if True:  # Change to True to activate n time n space
+        if False:  # Change to True to activate n time n space
             b = L0238(nums, ans, work, "n time n space")
-        if False:  # Change to True to activate n time 1 space
+        if True:  # Change to True to activate n time 1 space
             b = L0238(nums, ans, work, "n time 1 space")
         return ans
 
