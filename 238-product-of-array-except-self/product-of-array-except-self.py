@@ -9,9 +9,9 @@ class Solution:
         ans = []
         if (False):
             b = L0238(nums,ans,work,"Brute Force")
-        if (True):
-            b = L0238(nums,ans,work,"Use Division")
         if (False):
+            b = L0238(nums,ans,work,"Use Division")
+        if (True):
             b = L0238(nums,ans,work,"n time n space")
         if (False):
             b = L0238(nums,ans,work,"n time 1 space")
