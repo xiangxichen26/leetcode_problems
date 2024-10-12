@@ -18,9 +18,9 @@ class Solution:
         # Uncomment the algorithm you want to test:
         if False:  # Change to True to activate Brute Force
             b = L0238(nums, ans, work, "Brute Force")
-        if True:  # Change to True to activate Use Division
+        if False:  # Change to True to activate Use Division
             b = L0238(nums, ans, work, "Use Division")
-        if False:  # Change to True to activate n time n space
+        if True:  # Change to True to activate n time n space
             b = L0238(nums, ans, work, "n time n space")
         if False:  # Change to True to activate n time 1 space
             b = L0238(nums, ans, work, "n time 1 space")
