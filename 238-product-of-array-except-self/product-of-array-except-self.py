@@ -17,11 +17,11 @@ class Solution:
         ans = []
         if (False):
             b = L0238(nums,ans,work,"Brute Force")
-        if (False):
+        if (True):
             b = L0238(nums,ans,work,"Use Division")
         if (False):
             b = L0238(nums,ans,work,"n time n space")
-        if (True):
+        if (False):
             b = L0238(nums,ans,work,"n time 1 space")
         return ans
 
@@ -82,59 +82,40 @@ class Algorithm:
     def _nsquare_time_constant_space(self):
         n = len(self._s)
         for i in range(n):
-            p=1
+            product = 1
             for j in range(n):
-                if (i!=j):
-                    p*=self._s.getdata(j)
-                self._s.setans(i,p)
+                if i != j:
+                    product *= self._s.getdata(j)
+            self._s.setans(i, product)
         
 
     ########################################
     # TIME:THETA(N)
     # Space:THETA(1)
     #########################################
-    
-    def _get_product_of_whole_array(self)->'[int,bool]':
-        n = len(self._s)
-        p = 1
-        numzero = 0
-        for i in range(n):
-            v = self._s.getdata(i)
-            if (v):
-                p = p*v
-            else:
-                numzero = numzero + 1
-        
-        if(numzero == n):
-            return [0, True] 
-        
-        if(numzero == 1):
-            return [p, True]
-        
-        if(numzero > 1):
-            return [0, True]
-        
-        return [p, False]
 
     def _n_time_constant_space_with_divison(self)->'None':
         n = len(self._s)
-        [product, hasZero] = self._get_product_of_whole_array()
-        n = len(self._s)
+    
+        total_product = 1
+        zero_count = 0
+    
         for i in range(n):
-            if(product == 0):
-                self._s.setans(i,0)
+            if self._s.getdata(i) != 0:
+                total_product *= self._s.getdata(i)
             else:
-                v = self._s.getdata(i)
-                if(hasZero):
-                    if(v):
-                        self._s.setans(i,0)
-                    else:
-                        self._s.setans(i,product)
+                zero_count += 1
+    
+        for i in range(n):
+            if zero_count == 0:  
+                self._s.setans(i, total_product // self._s.getdata(i))
+            elif zero_count == 1:  
+                if self._s.getdata(i) == 0:
+                    self._s.setans(i, total_product)  
                 else:
-                    if(v):
-                        self._s.setans(i, product//v)
-                    else:
-                        self._s.setans(i,0)
+                    self._s.setans(i, 0)  
+            else:  
+                self._s.setans(i, 0)  
 
         
             
@@ -145,20 +126,18 @@ class Algorithm:
     #########################################
     def _n_time_n_space(self)->'None':
         n = len(self._s)
-        a1=[0]*n
-        a2=[0]*n
-        l=1
-        a1[0]=1
-        for i in range(1,n):
-            l*=self._s.getdata(i-1)
-            a1[i]=l
-        r=1
-        a2[n-1]=1
-        for i in range(n-2,-1,-1):
-            r*=self._s.getdata(i+1)
-            a2[i]=r
+        right = [1]*n
+        left = [1]*n
+
+        for i in range(1, n):
+            left[i] = left[i - 1] * self._s.getdata(i - 1)
+
+        for i in range(n - 2, -1, -1):
+            right[i] = right[i + 1] * self._s.getdata(i + 1)
+
         for i in range(n):
-            self._s.setans(i,a1[i]*a2[i])
+            self._s.setans(i, left[i] * right[i])
+
         
 
     ########################################
@@ -167,13 +146,13 @@ class Algorithm:
     #########################################
     def _n_time_1_space(self)->'None':
         n = len(self._s) 
-        p=1
-        self._s.setans(0,1)
-        self._s.setans(1,self._s.getdata(0))
-        for i in range(2,n):
-            self._s.setans(i,self._s.getans(i-1)*self._s.getdata(i-1)) 
-        temp=self._s.getdata(n-1)
-        for i in range(n-2,-1,-1):
-            self._s.setans(i,self._s.getans(i)*temp) 
-            temp*=self._s.getdata(i)
+        left_product = 1
+        for i in range(n):
+            self._s.setans(i, left_product) 
+            left_product *= self._s.getdata(i)  
+            
+        right_product = 1
+        for i in range(n - 1, -1, -1):
+            self._s.setans(i, self._s.getans(i) * right_product)  
+            right_product *= self._s.getdata(i) 
         
