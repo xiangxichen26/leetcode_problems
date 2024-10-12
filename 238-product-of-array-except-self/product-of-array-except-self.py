@@ -17,11 +17,11 @@ class Solution:
         ans = []
         if (False):
             b = L0238(nums,ans,work,"Brute Force")
-        if (False):
+        if (True):
             b = L0238(nums,ans,work,"Use Division")
         if (False):
             b = L0238(nums,ans,work,"n time n space")
-        if (True):
+        if (False):
             b = L0238(nums,ans,work,"n time 1 space")
         return ans
 
@@ -82,11 +82,11 @@ class Algorithm:
     def _nsquare_time_constant_space(self):
         n = len(self._s)
         for i in range(n):
-            product = 1
+            prod = 1
             for j in range(n):
-                if i != j:
-                    product *= self._s.getdata(j)
-            self._s.setans(i, product)
+                if j != i:
+                    prod = prod * self._s.getdata(j)
+            self._s.setans(i, prod)
         
 
     ########################################
@@ -96,28 +96,27 @@ class Algorithm:
 
     def _n_time_constant_space_with_divison(self)->'None':
         n = len(self._s)
-    
-        total_product = 1
         zero_count = 0
-    
+        prod = 1
         for i in range(n):
-            if self._s.getdata(i) != 0:
-                total_product *= self._s.getdata(i)
-            else:
+            num = self._s.getdata(i)
+            if num == 0:
                 zero_count += 1
-    
-        for i in range(n):
-            if zero_count == 0:  
-                self._s.setans(i, total_product // self._s.getdata(i))
-            elif zero_count == 1:  
-                if self._s.getdata(i) == 0:
-                    self._s.setans(i, total_product)  
+            else:
+                prod *= num
+        if zero_count == 1:
+            for i in range(n):
+                if self._s.getdata(i)==0:
+                    self._s.setans(i, prod)
                 else:
-                    self._s.setans(i, 0)  
-            else:  
-                self._s.setans(i, 0)  
-
-        
+                    self._s.setans(i, 0)
+        elif zero_count > 1:
+            for i in range(n):
+                self._s.setans(i,0)
+        else:
+            for i in range(n):
+                remaining_product = prod // self._s.getdata(i)
+                self._s.setans(i, remaining_product)
             
 
     ########################################
@@ -126,33 +125,42 @@ class Algorithm:
     #########################################
     def _n_time_n_space(self)->'None':
         n = len(self._s)
-        right = [1]*n
-        left = [1]*n
-
-        for i in range(1, n):
-            left[i] = left[i - 1] * self._s.getdata(i - 1)
-
-        for i in range(n - 2, -1, -1):
-            right[i] = right[i + 1] * self._s.getdata(i + 1)
-
+        from_left = [0] * n
+        from_right = [0] * n
+        prod_from_left = 1
+        prod_from_right = 1
         for i in range(n):
-            self._s.setans(i, left[i] * right[i])
+            prod_from_left *= self._s.getdata(i)
+            from_left[i] = prod_from_left
+        for i in range(n-1, -1, -1):
+            prod_from_right *= self._s.getdata(i)
+            from_right[i] = prod_from_right
+        for i in range(n):
+            prod = 1
+            # check for boundries
+            if i > 0 and i < n-1:
+                prod = from_left[i-1] * from_right[i+1]
+                self._s.setans(i, prod)
+            elif i == 0 and n > 1:
+                self._s.setans(i, from_right[i+1])
+            elif i == n - 1 and n > 1:
+                self._s.setans(i, from_left[i-1])
+            elif i == 1:
+                self._s.setans(i, 1)
 
-        
 
     ########################################
     # TIME:THETA(N)
     # Space:THETA(1)
     #########################################
     def _n_time_1_space(self)->'None':
-        n = len(self._s) 
-        left_product = 1
+        n = len(self._s)
+        prod_from_left = 1
         for i in range(n):
-            self._s.setans(i, left_product) 
-            left_product *= self._s.getdata(i)  
-            
-        right_product = 1
+            self._s.setans(i, prod_from_left)
+            prod_from_left *= self._s.getdata(i)
+        prod_from_right = 1
         for i in range(n - 1, -1, -1):
-            self._s.setans(i, self._s.getans(i) * right_product)  
-            right_product *= self._s.getdata(i) 
+            self._s.setans(i, self._s.getans(i) * prod_from_right)
+            prod_from_right *= self._s.getdata(i)
         
