@@ -30,60 +30,73 @@ class Slist():
     # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
     #############################
     
+    # Check if the list is empty
+    class _DListNode:
+        # Private node class for doubly linked list
+        def __init__(self, val):
+            self.val = val
+            self.next = None
+            self.prev = None
+
     def is_empty(self):
         return self._len == 0
-
-    def append(self, value):
-        new_node = ListNode(value)
-        if self.is_empty():
-            self._first = new_node
-            self._last = new_node
-        else:
-            self._last.next = new_node
-            self._last = new_node
-        self._len += 1
-
-    def pop_front(self):
-        if self.is_empty():
-            raise IndexError("pop from empty list")
-        value = self._first.val
-        self._first = self._first.next
-        self._len -= 1
-        if self.is_empty():
-            self._last = None
-        return value
-
-    def pop_back(self):
-        if self.is_empty():
-            raise IndexError("pop from empty list")
-        if self._len == 1:
-            value = self._first.val
-            self._first = None
-            self._last = None
-        else:
-            current = self._first
-            while current.next != self._last:
-                current = current.next
-            value = self._last.val
-            self._last = current
-            self._last.next = None
-        self._len -= 1
-        return value
-
-    def front(self):
-        if self.is_empty():
-            raise IndexError("List is empty")
-        return self._first.val
-
-    def back(self):
-        if self.is_empty():
-            raise IndexError("List is empty")
-        return self._last.val
 
     def __len__(self):
         return self._len
 
-  
+    def append(self, val):
+        new_node = self._DListNode(val)
+        if self.is_empty():
+            self._first = self._last = new_node
+        else:
+            new_node.prev = self._last
+            self._last.next = new_node
+            self._last = new_node
+        self._len += 1
+
+    def prepend(self, val):
+        new_node = self._DListNode(val)
+        if self.is_empty():
+            self._first = self._last = new_node
+        else:
+            new_node.next = self._first
+            self._first.prev = new_node
+            self._first = new_node
+        self._len += 1
+
+    def pop_front(self):
+        if self.is_empty():
+            return None
+        val = self._first.val
+        if self._len == 1:
+            self._first = self._last = None
+        else:
+            self._first = self._first.next
+            self._first.prev = None
+        self._len -= 1
+        return val
+
+    def pop_back(self):
+        if self.is_empty():
+            return None
+        val = self._last.val
+        if self._len == 1:
+            self._first = self._last = None
+        else:
+            self._last = self._last.prev
+            self._last.next = None
+        self._len -= 1
+        return val
+
+    def get_front(self):
+        if self.is_empty():
+            return None
+        return self._first.val
+
+    def get_back(self):
+        if self.is_empty():
+            return None
+        return self._last.val
   
 ############################################################
 #  class  MyStack
@@ -93,26 +106,20 @@ class Slist():
 ########################################################### 
 class MyStack:
     def __init__(self):
-        #NOTHING CAN BE CHANGED HERE
+        # NOTHING CAN BE CHANGED HERE
         self._s = Slist()
-        
-    #############################
-    # WRITE All public functions BELOW
-    #############################
     
-    def push(self, x: int) -> None:
-        self._s.append(x)
+    def push(self, x):
+        self._s.prepend(x)
 
-    def pop(self) -> int:
-        return self._s.pop_back()
+    def pop(self):
+        return self._s.pop_front()
 
-    def top(self) -> int:
-        return self._s.back()
+    def top(self):
+        return self._s.get_front()
 
-    def empty(self) -> bool:
+    def empty(self):
         return self._s.is_empty()
-
-
 
 ############################################################
 #  class  MyQueue
@@ -122,26 +129,20 @@ class MyStack:
 ########################################################### 
 class MyQueue:
     def __init__(self):
-        #NOTHING CAN BE CHANGED HERE
+        # NOTHING CAN BE CHANGED HERE
         self._s = Slist()
-        
-    #############################
-    # WRITE All public functions BELOW
-    #############################
-
-    def push(self, x: int) -> None:
+    
+    def push(self, x):
         self._s.append(x)
 
-    def pop(self) -> int:
+    def pop(self):
         return self._s.pop_front()
 
-    def peek(self) -> int:
-        return self._s.front()
+    def peek(self):
+        return self._s.get_front()
 
-    def empty(self) -> bool:
+    def empty(self):
         return self._s.is_empty()
-
-
 
 ############################################################
 #  MyCircularQueue
@@ -151,35 +152,29 @@ class MyQueue:
 
 class MyCircularQueue:
     def __init__(self, k: int):
-        #NOTHING CAN BE CHANGED HERE
+        # NOTHING CAN BE CHANGED HERE
         self._K = k 
         self._s = Slist()
-        
-    #############################
-    # WRITE All public functions BELOW
-    #############################
-
+    
     def enQueue(self, value: int) -> bool:
-        if self.isFull():
-            return False
-        self._s.append(value)
-        return True
+        if len(self._s) < self._K:
+            self._s.append(value)
+            return True
+        return False
 
     def deQueue(self) -> bool:
-        if self.isEmpty():
+        if self._s.is_empty():
             return False
         self._s.pop_front()
         return True
 
     def Front(self) -> int:
-        if self.isEmpty():
-            return -1
-        return self._s.front()
+        val = self._s.get_front()
+        return val if val is not None else -1
 
     def Rear(self) -> int:
-        if self.isEmpty():
-            return -1
-        return self._s.back()
+        val = self._s.get_back()
+        return val if val is not None else -1
 
     def isEmpty(self) -> bool:
         return self._s.is_empty()
@@ -187,10 +182,7 @@ class MyCircularQueue:
     def isFull(self) -> bool:
         return len(self._s) == self._K
 
- 
-
-
-###########################################################
+############################################################
 #  MyCircularDeque
 #641. Design Circular Deque
 #https://leetcode.com/problems/design-circular-deque
@@ -198,56 +190,44 @@ class MyCircularQueue:
 ###########################################################  
 class MyCircularDeque:
     def __init__(self, k: int):
-        #NOTHING CAN BE CHANGED HERE
+        # NOTHING CAN BE CHANGED HERE
         self._K = k 
         self._s = Slist()
-        
-#############################
-# WRITE All public functions BELOW
-#############################
-
+    
     def insertFront(self, value: int) -> bool:
-        if self.isFull():
-            return False
-        new_node = ListNode(value)
-        new_node.next = self._s._first
-        self._s._first = new_node
-        if self._s.is_empty():
-            self._s._last = new_node
-        self._s._len += 1
-        return True
+        if len(self._s) < self._K:
+            self._s.prepend(value)
+            return True
+        return False
 
     def insertLast(self, value: int) -> bool:
-        if self.isFull():
-            return False
-        self._s.append(value)
-        return True
+        if len(self._s) < self._K:
+            self._s.append(value)
+            return True
+        return False
 
     def deleteFront(self) -> bool:
-        if self.isEmpty():
+        if self._s.is_empty():
             return False
         self._s.pop_front()
         return True
 
     def deleteLast(self) -> bool:
-        if self.isEmpty():
+        if self._s.is_empty():
             return False
         self._s.pop_back()
         return True
 
     def getFront(self) -> int:
-        if self.isEmpty():
-            return -1
-        return self._s.front()
+        val = self._s.get_front()
+        return val if val is not None else -1
 
     def getRear(self) -> int:
-        if self.isEmpty():
-            return -1
-        return self._s.back()
+        val = self._s.get_back()
+        return val if val is not None else -1
 
     def isEmpty(self) -> bool:
         return self._s.is_empty()
 
     def isFull(self) -> bool:
         return len(self._s) == self._K
- 
