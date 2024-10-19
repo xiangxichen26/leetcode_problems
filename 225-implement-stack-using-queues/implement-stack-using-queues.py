@@ -1,199 +1,233 @@
+
+############################################################
+# Write code in file solution.py 
+# Post� solution.py in Canvas along with 4 screen shots that shows Leetcode has passed. We will not use screen shot to give 100
+# Cut and paste the whole solution.py file in Leetcode and run. All tests must pass
+# Note that you should do 4 times in 225, 235,622 and 641
+# TA will run solution.py file 4 times in 225, 235,622 and 641
+# All tests must pass for 100
+########################################################### 
+
 class ListNode:
-    # NOTHING CAN BE CHANGED HERE
-    def __init__(self, val=0, next=None):
+    #NOTHING CAN BE CHANGED HERE
+    def __init__(self, val = 0, next= None):
         self.val = val
         self.next = next
-
-class Slist:
+         
+            
+############################################################
+#  class  Slist
+###########################################################   
+class Slist():
     def __init__(self):
-        # NOTHING CAN BE CHANGED HERE
+        #NOTHING CAN BE CHANGED HERE
         self._first = None
         self._last = None
-        self._len = 0
-
-    def append(self, val):
-        new_node = ListNode(val)
-        if self._last is None:
-            self._first = self._last = new_node
+        self._len = 0 
+        
+    #############################
+    # WRITE All public functions BELOW
+    # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
+    #############################
+    def append(self,val):
+        next_node = ListNode(val)
+        if not self._first:
+            self._first = self._last = next_node
         else:
-            self._last.next = new_node
-            self._last = new_node
+            self._last.next = next_node
+            self._last = next_node
         self._len += 1
 
     def pop(self):
         if self._first is None:
-            raise IndexError("Pop from empty list")
-        val = self._first.val
-        self._first = self._first.next
-        if self._first is None:
-            self._last = None
+            raise IndexError("Pop invalid for empty list")
+        current = self._first
+        if self._first == self._last:
+            val = self._first.val
+            self._first = self._last = None
+        else:
+            while current.next != self._last:
+                current = current.next
+            val = self._last.val
+            self._last = current
+            self._last.next = None
         self._len -= 1
         return val
-
-    def peek(self):
-        if self._first is None:
-            raise IndexError("Peek from empty list")
-        return self._first.val
 
     def is_empty(self):
         return self._len == 0
 
-    def size(self):
+    def peek(self):
+        if not self._last:
+            raise IndexError("No element to peek")
+        return self._last.val
+
+    def __len__(self):
         return self._len
 
+    def pop_first(self):
+        if not self._first:
+            return None
+        value = self._first.val
+        self._first = self._first.next
+        self._len -= 1
+        if not self._first:
+            self._last = None
+        return value
+
+    def get_first(self):
+        if not self._first:
+            return None  # or raise an exception if you prefer
+        return self._first.val
+        
+            
+        
+  
+  
 ############################################################
-# 225. Implement Stack using Queues
-############################################################
-from collections import deque
+#  class  MyStack
+#225. Implement Stack using Queues
+
+#https://leetcode.com/problems/implement-stack-using-queues
+########################################################### 
 class MyStack:
-
     def __init__(self):
-        self.queue = deque()
+        #NOTHING CAN BE CHANGED HERE
+        self._s = Slist()
 
-    def push(self, x):
-        self.queue.append(x)
-        # Reverse the queue order after each push to simulate stack behavior
-        for _ in range(len(self.queue) - 1):
-            self.queue.append(self.queue.popleft())
+    def push(self, x)->None:
+        self._s.append(x)
 
     def pop(self):
-        return self.queue.popleft()
+        return self._s.pop()
 
     def top(self):
-        return self.queue[0]
+        return self._s.peek()
 
     def empty(self):
-        return not self.queue
+        return self._s.is_empty()
+        
+
     
 
-############################################################
-# 232. Implement Queue using Stacks
-############################################################
-class MyQueue:
 
+############################################################
+#  class  MyQueue
+#232. Implement Queue using Stacks
+
+# https://leetcode.com/problems/implement-queue-using-stacks/
+########################################################### 
+class MyQueue:
     def __init__(self):
-        self.input_stack = []
-        self.output_stack = []
+        #NOTHING CAN BE CHANGED HERE
+        self._s = Slist()
 
     def push(self, x):
-        self.input_stack.append(x)
+        stack2 = Slist()
+        while not self._s.is_empty():
+            stack2.append(self._s.pop())
+        self._s.append(x)
+        while not stack2.is_empty():
+            self._s.append(stack2.pop())
 
     def pop(self):
-        self._move_input_to_output()
-        return self.output_stack.pop()
+        return self._s.pop()
 
     def peek(self):
-        self._move_input_to_output()
-        return self.output_stack[-1]
+        return self._s.peek()
 
     def empty(self):
-        return not self.input_stack and not self.output_stack
-
-    def _move_input_to_output(self):
-        if not self.output_stack:
-            while self.input_stack:
-                self.output_stack.append(self.input_stack.pop())
+        return self._s.is_empty()
 
 
 ############################################################
+#  MyCircularQueue
 # 622. Design Circular Queue
-############################################################
+# https://leetcode.com/problems/design-circular-queue/
+########################################################### 
+
 class MyCircularQueue:
+    def __init__(self, k: int):
+        #NOTHING CAN BE CHANGED HERE
+        self._K = k 
+        self._s = Slist()
 
-    def __init__(self, k):
-        self.queue = [0] * k
-        self.max_size = k
-        self.front = 0
-        self.rear = -1
-        self.size = 0
+    def enQueue(self, value: int) -> bool:
+        if len(self._s) < self._K:
+            self._s.append(value)
+            return True
+        return False
+        
+    def deQueue(self) -> bool:
+        if not self._s.is_empty():
+            self._s.pop_first()  # Assuming Slist has a pop_first method
+            return True
+        return False
 
-    def enQueue(self, value):
-        if self.isFull():
-            return False
-        self.rear = (self.rear + 1) % self.max_size
-        self.queue[self.rear] = value
-        self.size += 1
-        return True
+    def Front(self) -> int:
+        if not self._s.is_empty():
+            return self._s.get_first()  # Assuming Slist has a get_first method
+        return -1
 
-    def deQueue(self):
-        if self.isEmpty():
-            return False
-        self.front = (self.front + 1) % self.max_size
-        self.size -= 1
-        return True
+    def Rear(self) -> int:
+        if not self._s.is_empty():
+            return self._s.peek()
+        return -1
 
-    def Front(self):
-        if self.isEmpty():
-            return -1
-        return self.queue[self.front]
+    def isEmpty(self) -> bool:
+        return self._s.is_empty()
 
-    def Rear(self):
-        if self.isEmpty():
-            return -1
-        return self.queue[self.rear]
-
-    def isEmpty(self):
-        return self.size == 0
-
-    def isFull(self):
-        return self.size == self.max_size
-
+    def isFull(self) -> bool:
+        return len(self._s) == self._K
 
 ############################################################
-# 641. Design Circular Deque
-############################################################
+#  MyCircularDeque
+#641. Design Circular Deque
+#https://leetcode.com/problems/design-circular-deque
+
+###########################################################  
 class MyCircularDeque:
-
-    def __init__(self, k):
-        self.queue = [0] * k
-        self.max_size = k
-        self.front = 0
-        self.rear = -1
-        self.size = 0
+    def __init__(self, k: int):
+        #NOTHING CAN BE CHANGED HERE
+        self._K = k 
+        self._s = Slist()
 
     def insertFront(self, value):
-        if self.isFull():
-            return False
-        self.front = (self.front - 1 + self.max_size) % self.max_size
-        self.queue[self.front] = value
-        self.size += 1
-        return True
+        if self._s._len < self._K:
+            return True
+        return False
 
     def insertLast(self, value):
-        if self.isFull():
-            return False
-        self.rear = (self.rear + 1) % self.max_size
-        self.queue[self.rear] = value
-        self.size += 1
-        return True
+        if self._s._len < self._K:
+            self._s.append(value)
+            return True
+        return False
 
     def deleteFront(self):
-        if self.isEmpty():
+        if self._s.is_empty():
             return False
-        self.front = (self.front + 1) % self.max_size
-        self.size -= 1
+            
         return True
 
     def deleteLast(self):
-        if self.isEmpty():
+        if self._s.is_empty():
             return False
-        self.rear = (self.rear - 1 + self.max_size) % self.max_size
-        self.size -= 1
+        self._s.pop()
         return True
 
     def getFront(self):
-        if self.isEmpty():
+        if self._s.is_empty():
             return -1
-        return self.queue[self.front]
+            
+        return self._s.peek()
 
     def getRear(self):
-        if self.isEmpty():
+        if self._s.is_empty():
             return -1
-        return self.queue[self.rear]
+        return self._s.peek()
 
     def isEmpty(self):
-        return self.size == 0
+        return self._s.is_empty()
 
     def isFull(self):
-        return self.size == self.max_size
-
+        return self._s._len == self._K
