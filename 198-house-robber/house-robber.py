@@ -46,24 +46,24 @@ def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python l
 # Author: Jagadeesh Vasudevamurthy
 # Copyright: Jagadeesh Vasudevamurthy 2024
 ###########################################################
- 
+
 ############################################################
 #  All imports here
 ###########################################################
- 
+
 ############################################################
 #  class  Alg
-###########################################################    
+###########################################################
 class Alg():
-    def __init__(self,a:'python list',ans:'python list',maxv:'list of size 1',work:'list of size 1',show:'bool'):
-        ## Nothing can be changed below
+    def __init__(self, a: 'python list', ans: 'python list', maxv: 'list of size 1', work: 'list of size 1', show: 'bool'):
+        # Nothing can be changed below
         self._a = a
         self._ans = ans
         self._maxv = maxv
         self._work = work
         self._show = show
-        self._exam() #Everything happens in _exam
-       
+        self._exam()  # Everything happens in _exam
+
     ############################################################
     #          Nothing can be changed in _exam
     ###########################################################
@@ -71,129 +71,129 @@ class Alg():
         alg1_ans = []
         alg1_max = [0]
         if (len(self._a) < 16):
-          self._alg1()
-          assert(self._work[0])
-          #your answer is checked here after exam
-          check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0])
-         
-          for e in self._ans:
-            alg1_ans.append(e)
-          alg1_max[0] = self._maxv[0]
-          self._ans.clear()
-         
-          self._maxv[0] = 0
-          self._work[0] = 0
- 
-        #always run alg2
+            self._alg1()
+            assert(self._work[0])
+            # your answer is checked here after exam
+            check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
+
+            for e in self._ans:
+                alg1_ans.append(e)
+            alg1_max[0] = self._maxv[0]
+            self._ans.clear()
+
+            self._maxv[0] = 0
+            self._work[0] = 0
+
+        # always run alg2
         self._alg2()
         assert(self._work[0])
-        #your answer is checked here after exam
-        check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0])
- 
+        # your answer is checked here after exam
+        check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
+
     ############################################################
-    #          WRITE CODE BELOW
+    #          Updated _alg1 Code
+    ###########################################################
+        ############################################################
+    #          Updated _alg1 Code
     ###########################################################
     def _alg1(self):
-        # Initialize variables for the problem
-        size = len(self._a) # Length of the input array
-        self._ans.clear() # Clear the answer list
-        self._maxv[0] = 0 # Reset the maximum value to 0
-        self._work[0] = 0 # Reset the work counter
+        n = len(self._a)
+        max_score = 0
+        optimal_subset = []
+        self._work[0] = 0
 
-        # Recursive explore function to explore all subsets of non-adjacent elements
-        def explore(idx, chosen, sum_so_far):
-            # Increment work counter to track operations
-            self._work[0] += 1
-        
-            # Print the current state of exploration
-            print(f"Step {self._work[0]}: Exploring idx={idx}, chosen={chosen}, sum_so_far={sum_so_far}")
+        print("------- Exhaustive Search Algorithm ------------")
+        subset_count = 1
+        # Generate all subsets manually
+        for subset_index in range(1 << n):  # 2^n subsets
+            current_subset = []
+            for i in range(n):
+                if subset_index & (1 << i):  # Check if bit i is set in subset_index
+                    current_subset.append(i)
 
-            # Base case: if the index is out of bounds, check if the current sum is the best
-            if idx >= size:
-                if sum_so_far > self._maxv[0]:
-                    print(f"Updating _maxv from {self._maxv[0]} to {sum_so_far}, _ans to {chosen}")
-                    self._maxv[0] = sum_so_far
-                    self._ans[:] = chosen[:] # Update the best selection
-                return
-            # Exclude the current element and move to the next index
-            explore(idx + 1, chosen, sum_so_far)
-            
-            # Include the current element if it's not adjacent to the last selected element
-            if not chosen or chosen[-1] != idx - 1:
-                explore(idx + 1, chosen + [idx], sum_so_far + self._a[idx])
-        # Start recursion from the first index
-        explore(0, [], 0)
+            # Check validity of current_subset (no consecutive indices)
+            is_valid_subset = True
+            for j in range(1, len(current_subset)):
+                if current_subset[j] - current_subset[j - 1] == 1:
+                    is_valid_subset = False
+                    break
 
-        # Debug output to show the results
-        if self._show:
-            print("------- Algorithm 1 -----------")
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")   
+            if is_valid_subset:
+                subset_score = 0
+                for idx in current_subset:
+                    subset_score += self._a[idx]
+                self._work[0] += 1
+                if self._show:
+                    print(f"{subset_count} : {current_subset} = {subset_score}")
+                subset_count += 1
+                if subset_score > max_score:
+                    max_score = subset_score
+                    optimal_subset = current_subset
+
+        self._maxv[0] = max_score
+        self._ans.clear()
+        self._ans.extend(optimal_subset)
+
+        print(f"maxv = {max_score}")
+        print(f"ans = {optimal_subset}")
+        print(f"work = {self._work[0]}")
+
     ############################################################
-    #          WRITE CODE BELOW
+    #          Updated _alg2 Code
+    ########
+
+
+    ############################################################
+    #          Updated _alg2 Code
     ###########################################################
     def _alg2(self):
-        # Get the size of the input array
-        length = len(self._a)
-
-        # Handle the edge case where the input array is empty
-        if length == 0:
+        n = len(self._a)
+        if n == 0:
             self._maxv[0] = 0
             self._ans.clear()
-            self._work[0] = 1 # One operation to detect empty input
-            if self._show:
-                print("------- Algorithm 2 -----------")
-                print(f"maxv = {self._maxv[0]}")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
+            self._work[0] = 0
             return
 
-        # Initialize DP array and list to store selected indices
-        dp_table = [0] * length
-        selected = [[] for _ in range(length)]
+        max_scores = [0] * n  # Max scores up to index i
+        selected_indices = [[] for _ in range(n)]  # Track selected indices
         self._work[0] = 0
- 
-        # Base case: first element
-        dp_table[0] = self._a[0]
-        selected[0] = [0]
-        self._work[0] += 1
-        
-        # Base case: second element
-        if length > 1:
-            dp_table[1] = max(self._a[0], self._a[1])
-            selected[1] = [0] if self._a[0] > self._a[1] else [1]
-            self._work[0] += 1
 
-        # Fill DP table for the rest of the elements
-        for i in range(2, length):
+        print("------- Dynamic Programming Algorithm ------------")
+        for index in range(n):
             self._work[0] += 1
-            if dp_table[i - 1] >= dp_table[i - 2] + self._a[i]:
-                dp_table[i] = dp_table[i - 1]
-                selected[i] = selected[i - 1][:]
+            if index == 0:
+                max_scores[index] = self._a[index]
+                selected_indices[index] = [index]
+            elif index == 1:
+                if self._a[index] > max_scores[index - 1]:
+                    max_scores[index] = self._a[index]
+                    selected_indices[index] = [index]
+                else:
+                    max_scores[index] = max_scores[index - 1]
+                    selected_indices[index] = selected_indices[index - 1]
             else:
-                dp_table[i] = dp_table[i - 2] + self._a[i]
-                selected[i] = selected[i - 2] + [i]
+                if max_scores[index - 1] > max_scores[index - 2] + self._a[index]:
+                    max_scores[index] = max_scores[index - 1]
+                    selected_indices[index] = selected_indices[index - 1]
+                else:
+                    max_scores[index] = max_scores[index - 2] + self._a[index]
+                    selected_indices[index] = selected_indices[index - 2] + [index]
 
-        # Extract the results from the DP table
-        self._maxv[0] = dp_table[-1]
-        self._ans[:] = selected[-1]
-        
-        # Debug output to show the results
-        if self._show:
-            print("------- Algorithm 2 -----------")
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
- 
-############################################################
-#  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
-###########################################################  
- 
+            if self._show:
+                print(f"{index + 1} : {selected_indices[index]} = {max_scores[index]}")
+
+        self._maxv[0] = max_scores[-1]
+        self._ans.clear()
+        self._ans.extend(selected_indices[-1])
+
+        print(f"maxv = {self._maxv[0]}")
+        print(f"ans = {self._ans}")
+        print(f"work = {self._work[0]}")
+
 ############################################################
 # Nothing can be changed in check_result
 # Note check_result is a global hanging function
-###########################################################  
-def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
+###########################################################
+def check_result(a: 'Python list', ans: 'Python List', amax: 'int', alg1_ans: 'Python list', alg1_max: 'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
