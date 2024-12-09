@@ -104,105 +104,110 @@ class Alg():
 
     ############################################################
     #          WRITE CODE BELOW
-    
-    #Brute Force Implementation using Recursion
     ########################################################### 
-#     def _alg1(self):
-#             if not self._a:
-#                 self._work[0] = 1
-#                 self._maxv[0] = 0
-#                 return
-
-#             n = len(self._a)
-#             self._work[0] = 0
-#             max_total = 0
-#             best_path = []
-#             for mask in range(1 << n):
-#                 self._work[0] += 1
-#                 current_total = 0
-#                 current_path = []
-#                 valid = True
-#                 for i in range(n):
-#                     if mask & (1 << i):
-#                         if i > 0 and mask & (1 << (i-1)):
-#                             valid = False
-#                             break
-#                         current_total += self._a[i]
-#                         current_path.append(i)
-
-#                 if valid and current_total > max_total:
-#                     max_total = current_total
-#                     best_path = current_path
-
-#             self._maxv[0] = max_total
-#             self._ans[:] = best_path
-
-#             if self._show:
-#                 print(f"Work = {self._work[0]}, Max Value = {self._maxv[0]}, Selected Indices = {self._ans}")
-    
     def _alg1(self):
-        def brute_force(index, selected, current_total):
-            nonlocal max_total, best_path
-            self._work[0] += 1  # Increment work counter
-            if index >= len(self._a):
-                if current_total > max_total:
-                    max_total = current_total
-                    best_path = selected[:]
+        n = len(self._a)
+        a = self._a
+        def generate_combinations(index, current_combination):
+            self._work[0] += 1
+            if index >= n:
+                subset_sum = sum(a[i] for i in current_combination)
+                if self._show:
+                    print(f"{current_combination} = {subset_sum}")
                 return
-            brute_force(index + 1, selected, current_total)
-            brute_force(index + 2, selected + [index], current_total + self._a[index])    
         
-        if not self._a:
-            self._work[0] = 1
-            self._maxv[0] = 0
-            return
+            generate_combinations(index + 2, current_combination + [index])
+            generate_combinations(index + 1, current_combination)
+        
+        generate_combinations(0, [])
+        def helper(index):
+            if index < 0:
+                return (0, [])
+            
+            include_sum, include_indices = helper(index - 2)
+            include_sum += a[index]
+            include_indices = include_indices + [index]
+            
+            exclude_sum, exclude_indices = helper(index - 1)
+            
+            if include_sum > exclude_sum:
+                return include_sum, include_indices
+            else:
+                return exclude_sum, exclude_indices
+        
+        total, indices = helper(n - 1)
+        self._maxv[0] = total
+        self._ans.extend(indices)
 
-        max_total = 0
-        best_path = []
-        self._work[0] = 0  # Reset work counter
-        brute_force(0, [], 0)
-    
-        self._maxv[0] = max_total
-        self._ans.clear()
-        self._ans.extend(best_path)
         if self._show:
-            print(f" Work = {self._work[0]}, Maximum Value = {self._maxv[0]}, Best Indices = {self._ans}")
-      
-        
+            print('----------------------------------------------')
+            print('Algorithm - 1 (Brute Force)')
+            print("Complexity Time: O(2^n * n) Space:O(n)")
+            print('----------------------------------------------')
+            print(f"maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")    
+            print('----------------------------------------------')
     ############################################################
     #          WRITE CODE BELOW
-    
-    # The optimal solution uses Dynamic Programming
     ########################################################### 
     def _alg2(self):
         n = len(self._a)
         if n == 0:
-            self._work[0] = 1
             self._maxv[0] = 0
+            self._work[0] += 1
+            return
+        elif n == 1:
+            self._maxv[0] = self._a[0]
+            self._ans.append(0)
+            self._work[0] += 1
             return
 
-        self._work[0] = 0  # Reset work counter
+        dp = [0] * n
+        prev = [-1] * n
 
-        optimal = [0] * (n + 1)
-        optimal_track = [[] for _ in range(n + 1)]
+        dp[0] = self._a[0]
+        dp[1] = max(self._a[0], self._a[1])
+        prev[0] = -1
+        prev[1] = 0 if self._a[0] >= self._a[1] else -1
+        self._work[0] += 2
 
-        for i in range(1, n + 1):
-            self._work[0] += 1  # Track computational work
-            if optimal[i - 1] >= self._a[i - 1] + (optimal[i - 2] if i > 1 else 0):
-                optimal[i] = optimal[i - 1]
-                optimal_track[i] = optimal_track[i - 1][:]
+        for i in range(2, n):
+            self._work[0] += 1
+            if dp[i-1] > dp[i-2] + self._a[i]:
+                dp[i] = dp[i-1]
+                prev[i] = prev[i-1]
             else:
-                optimal[i] = self._a[i - 1] + (optimal[i - 2] if i > 1 else 0)
-                optimal_track[i] = optimal_track[i - 2][:] if i > 1 else []
-                optimal_track[i].append(i - 1)
+                dp[i] = dp[i-2] + self._a[i]
+                prev[i] = i-2
 
-        self._maxv[0] = optimal[n]
+        self._maxv[0] = dp[-1]
         self._ans.clear()
-        self._ans.extend(optimal_track[n])
+        i = n - 1
+        indices = []
+
+        while i >= 0:
+            self._work[0] += 1
+            if i == 0:
+                indices.append(0)
+                break
+            if dp[i] == dp[i-1]:
+                i -= 1
+            else:
+                indices.append(i)
+                i -= 2
+
+        indices.reverse()
+        self._ans.extend(indices)
 
         if self._show:
-            print(f" Work = {self._work[0]}, Maximum Value = {self._maxv[0]}, Best Indices = {self._ans}")
+            print('----------------------------------------------')
+            print('Algorithm - 2')
+            print("Complexity Time: O(n) Space:O(n)")
+            print('----------------------------------------------')
+            print(f"{indices} : {self._maxv[0]}")
+            print(f"maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+            print('----------------------------------------------')
 
+        self._work[0] += 1
   
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
@@ -215,3 +220,5 @@ class Alg():
 def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
+    
+ 
