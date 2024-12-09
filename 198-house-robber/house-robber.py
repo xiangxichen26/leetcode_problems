@@ -73,7 +73,7 @@ class Alg():
     def _exam(self):
         alg1_ans = []
         alg1_max = [0]
-        if (len(self._a) < 16):
+        if (len(self._a) <16):
           self._alg1()
           assert(self._work[0])
           #your answer is checked here after exam
@@ -98,83 +98,99 @@ class Alg():
     ########################################################### 
     def _alg1(self):
         n = len(self._a)
-        maxMarks = 0
-        bestCombination = []
+        max_marks = 0
+        max_sub = []
         self._work[0] = 0
+
         print("------- Alg 1 ------------")
         step = 1
+        # Generate all subs manually
         for num in range(1 << n):  
-            subset = []
+            sub = []
             for i in range(n):
-                if num & (1 << i): 
-                    subset.append(i)
+                if num & (1 << i):  
+                    sub.append(i)
+
             valid = True
-            for j in range(1, len(subset)):
-                if subset[j] - subset[j - 1] == 1:
+            for j in range(1, len(sub)):
+                if sub[j] - sub[j - 1] == 1:
                     valid = False
                     break
+
             if valid:
                 marks = 0
-                for idx in subset:
+                for idx in sub:
                     marks += self._a[idx]
                 self._work[0] += 1
                 if self._show:
-                    print(f"{step} : {subset} = {marks}")
+                    print(f"{step} : {sub} = {marks}")
                 step += 1
-                if marks > maxMarks:
-                    maxMarks = marks
-                    bestCombination = subset
-        self._maxv[0] = maxMarks
+                if marks > max_marks:
+                    max_marks = marks
+                    max_sub = sub
+
+        self._maxv[0] = max_marks
         self._ans.clear()
-        self._ans.extend(bestCombination)
-        print(f"maxv = {maxMarks}")
-        print(f"ans = {bestCombination}")
+        self._ans.extend(max_sub)
+
+        print(f"maxv = {max_marks}")
+        print(f"ans = {max_sub}")
         print(f"work = {self._work[0]}")
 
-         
+
+    
         
     ############################################################
     #          WRITE CODE BELOW
     ########################################################### 
     def _alg2(self):
         n = len(self._a)
+        dp = [0] * (n + 1) # DP table 
+        indices = [[] for _ in range(n + 1)]  
+
         if n == 0:
             self._maxv[0] = 0
-            self._ans.clear()
             self._work[0] = 1
+            
             return
-        dp = [0] * n  # Max marks up to index i
-        selectedIndices = [[] for _ in range(n)]
-        self._work[0] = 0
-        print("------- Alg 2 ------------")
-        for i in range(n):
-            self._work[0] += 1
-            if i == 0:
-                dp[i] = self._a[i]
-                selectedIndices[i] = [i]
-            elif i == 1:
-                if self._a[i] > dp[i - 1]:
-                    dp[i] = self._a[i]
-                    selectedIndices[i] = [i]
-                else:
-                    dp[i] = dp[i - 1]
-                    selectedIndices[i] = selectedIndices[i - 1]
+
+        # Base case: Only the first course can be selected
+        dp[1] = self._a[0]
+        indices[1] = [0]
+        self._work[0] = 1
+
+        if self._show:
+            print("------- Alg 2 ------------")
+            print(f"1 : {indices[1]} = {dp[1]}")
+
+        for i in range(2, n + 1):
+            self._work[0] += 1 # Count computation
+            
+            if dp[i - 1] > dp[i - 2] + self._a[i - 1]:
+                dp[i] = dp[i - 1]
+                indices[i] = indices[i - 1]
             else:
-                if dp[i - 1] > dp[i - 2] + self._a[i]:
-                    dp[i] = dp[i - 1]
-                    selectedIndices[i] = selectedIndices[i - 1]
-                else:
-                    dp[i] = dp[i - 2] + self._a[i]
-                    selectedIndices[i] = selectedIndices[i - 2] + [i]
+                dp[i] = dp[i - 2] + self._a[i - 1]
+                indices[i] = indices[i - 2] + [i - 1]
+
+            # Print step-by-step progress
             if self._show:
-                print(f"{i + 1} : {selectedIndices[i]} = {dp[i]}")
-        self._maxv[0] = dp[-1]
+                print(f"{i} : {indices[i]} = {dp[i]}")
+
+        # Store final results
+        self._maxv[0] = dp[n]
         self._ans.clear()
-        self._ans.extend(selectedIndices[-1])
-        print(f"maxv = {self._maxv[0]}")
-        print(f"ans = {self._ans}")
-        print(f"work = {self._work[0]}")
-    
+        self._ans.extend(indices[n])
+
+        # Print summary if debugging is enabled
+        if self._show:
+            print("------- Alg ------------")
+            print(f"maxv = {self._maxv[0]}")
+            print(f"ans = {self._ans}")
+            print(f"work = {self._work[0]}")
+
+
+  
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
@@ -186,5 +202,3 @@ class Alg():
 def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
-    
- 
