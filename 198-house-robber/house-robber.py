@@ -72,18 +72,18 @@ class Alg():
         alg1_ans = []
         alg1_max = [0]
         if (len(self._a) < 25):
-            self._alg1()
-            assert(self._work[0])
-            #your answer is checked here after exam
-            check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
-            
-            for e in self._ans:
-                alg1_ans.append(e)
-            alg1_max[0] = self._maxv[0]
-            self._ans.clear()
-            
-            self._maxv[0] = 0 
-            self._work[0] = 0
+          self._alg1()
+          assert(self._work[0])
+          #your answer is checked here after exam
+          check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
+          
+          for e in self._ans:
+            alg1_ans.append(e)
+          alg1_max[0] = self._maxv[0]
+          self._ans.clear()
+          
+          self._maxv[0] = 0 
+          self._work[0] = 0
 
         #always run alg2
         self._alg2()
@@ -92,164 +92,121 @@ class Alg():
         check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
 
     ############################################################
-    #          WRITE CODE BELOW
+    #  Time Complexity: O(2^n)
+    #  Space Complexity: O(n)
     ########################################################### 
-    def _try_combinations(self, index, curr_sum, selected):
-        self._work[0] += 1
-        n = len(self._a)
-
-        # Base case: reached end of array
-        if index >= n:
-            if curr_sum > self._maxv[0] or (curr_sum == self._maxv[0] and (not self._ans or selected[0] < self._ans[0])):
-                self._maxv[0] = curr_sum
-                self._ans.clear()
-                self._ans.extend(selected)
-            return
-
-        # Skip current index
-        self._try_combinations(index + 1, curr_sum, selected)
-
-        # Take current index if we can
-        if not selected or selected[-1] != index - 1:
-            selected.append(index)
-            self._try_combinations(index + 1, curr_sum + self._a[index], selected)
-            selected.pop()
-
     def _alg1(self):
-        self._work[0] = 1
-        self._ans.clear()
-        self._maxv[0] = 0
+        stepCounter = [1]
+        def maxSumRec(arr, n, indices):
+            # Increment work counter
+            self._work[0] += 1
+            # Base cases
+            if n <= 0:
+                return 0, []
+            if n == 1:
+                return arr[0], [0]
+            # Recursion: pick or not pick
+            pick_sum, pick_indices = maxSumRec(arr, n - 2, indices)
+            self._work[0] += 1
+            pick_sum += arr[n - 1]
+            pick_indices = pick_indices + [n - 1]
+            
+            not_pick_sum, not_pick_indices = maxSumRec(arr, n - 1, indices)
+            
+            if pick_sum > not_pick_sum:
+                
+                if self._show:
+                    print(stepCounter[0], " : " , pick_indices, " = ", pick_sum)
+                    stepCounter[0] += 1
+                    
+                return pick_sum, pick_indices
+            else:
+
+                if self._show:
+                    print(stepCounter[0], " : " , not_pick_indices, " = ", not_pick_sum)
+                    stepCounter[0] += 1
+
+                return not_pick_sum, not_pick_indices
+
+        # Calculate the maximum sum and track indices
+        self._maxv[0], self._ans = maxSumRec(self._a, len(self._a), [])
+
         
-        if not self._a:  # Empty array
-            if self._show:
-                print("------- Alg 1 -----------")
-                print(f"maxv = [{self._maxv[0]}]")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
-            return
-
-        if len(self._a) == 1:  # Single element
-            self._maxv[0] = self._a[0]
-            self._ans.append(0)
-            if self._show:
-                print("------- Alg 1 -----------")
-                print(f"maxv = [{self._maxv[0]}]")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
-            return
-
-        # For large arrays
-        if len(self._a) >= 25:
-            n = len(self._a)
-            self._work[0] = n
-            # Use same index selection pattern as alg2
-            for i in range(1, n, 2):
-                self._maxv[0] += self._a[i]
-                self._ans.append(i)
-        else:
-            # Use recursive approach for smaller arrays
-            self._try_combinations(0, 0, [])
-            # For all zeros case
-            if self._maxv[0] == 0 and all(x == 0 for x in self._a):
-                self._ans.clear()
-                self._ans.extend([2, 4, 6] if len(self._a) >= 7 else range(2, len(self._a), 2))
-
-        if self._show:
-            print("------- Alg 1 -----------")
-            print(f"maxv = [{self._maxv[0]}]")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
-
+        print("----------- Alg 1 ------------")
+        print(f"maxv = {self._maxv[0]}")
+        print(f"ans = {self._ans}")
+        print(f"work = {self._work[0]}")
+        
+         
+        
+    ############################################################
+    #  Time Complexity: O(n)
+    #  Space Complexity: O(1)
+    ########################################################### 
     def _alg2(self):
+        stepCounter = 1
         n = len(self._a)
         if n == 0:
             self._maxv[0] = 0
-            self._work[0] = 1
-            if self._show:
-                print("------- Alg 2 -----------")
-                print(f"maxv = {self._maxv[0]}")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
-            return
-        elif n == 1:
-            self._maxv[0] = self._a[0]
-            self._ans.append(0)
-            self._work[0] = 1
-            if self._show:
-                print("------- Alg 2 -----------")
-                print(f"maxv = {self._maxv[0]}")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
-            return
-
-        # Initialize dp arrays
-        dp = [0] * n
-        parent = [-1] * n
-        
-        # Base cases
-        dp[0] = self._a[0]
-        dp[1] = max(self._a[0], self._a[1])
-        if self._a[1] > self._a[0]:
-            parent[1] = 1
-        else:
-            parent[1] = 0
-        
-        work = 2
-
-        # Always show first two states
-        if self._show:
-            print(f"0 : dp[0] = {dp[0]} (parent = {parent[0]})")
-            print(f"1 : dp[1] = {dp[1]} (parent = {parent[1]})")
-
-        # DP Transition
-        for i in range(2, n):
-            work += 1
-            take_current = dp[i-2] + self._a[i]
-            if dp[i-1] > take_current:
-                dp[i] = dp[i-1]
-                parent[i] = parent[i-1]
-            else:
-                dp[i] = take_current
-                parent[i] = i
-
-            # Always show state transitions
-            if self._show:
-                print(f"{i} : dp[{i}] = {dp[i]} (parent = {parent[i]})")
-
-        # Set maximum value
-        self._maxv[0] = dp[n-1]
-        
-        # Handle all zeros case
-        if all(x == 0 for x in self._a):
-            self._ans.extend([2, 4, 6] if n >= 7 else range(2, n, 2))
-            self._work[0] = work
-            if self._show:
-                print("------- Alg 2 -----------")
-                print(f"maxv = {self._maxv[0]}")
-                print(f"ans = {self._ans}")
-                print(f"work = {self._work[0]}")
-            return
-
-        # Reconstruct solution
-        i = n - 1
-        selected = set()
-        while i >= 0:
-            if dp[i] != (dp[i-1] if i > 0 else 0):
-                selected.add(i)
-                i -= 2
-            else:
-                i -= 1
-
-        self._ans.extend(sorted(selected))
-        self._work[0] = work
-
-        if self._show:
-            print("------- Alg 2 -----------")
+            self._ans = []
+            self._work[0] += 1
+            
+            print("----------- Alg 2 ------------")
             print(f"maxv = {self._maxv[0]}")
             print(f"ans = {self._ans}")
-            print(f"work = {work}")
+            print(f"work = {self._work[0]}")
+            return
+        
+        if n == 1:
+            self._maxv[0] = self._a[0]
+            self._ans = [0]
+            self._work[0] += 1
+            
+            print("----------- Alg 2 ------------")
+            print(f"maxv = {self._maxv[0]}")
+            print(f"ans = {self._ans}")
+            print(f"work = {self._work[0]}")
+            return
 
-############################################################
+        # DP variables
+        self._work[0] += 1
+        secondLast = 0
+        secondLastIndices = []
+
+        last = self._a[0]
+        lastIndices = [0]
+        res = 0
+
+        # Iterate through the array
+        for i in range(1, n):
+            self._work[0] += 1
+            
+            if self._a[i] + secondLast > last:
+                res = self._a[i] + secondLast
+                currentIndices = secondLastIndices + [i]
+            else:
+                res = last
+                currentIndices = lastIndices
+            if self._show:
+                print(stepCounter, " : " , currentIndices, " = ", res)
+                stepCounter += 1
+            
+            secondLast = last
+            secondLastIndices = lastIndices
+            last = res
+            lastIndices = currentIndices
+
+        self._maxv[0] = res
+
+        self._ans = lastIndices
+
+        
+        print("----------- Alg 2 ------------")
+        print(f"maxv = {self._maxv[0]}")
+        print(f"ans = {self._ans}")
+        print(f"work = {self._work[0]}")
+  
+ ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
 
@@ -260,3 +217,5 @@ class Alg():
 def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
+    
+ 
