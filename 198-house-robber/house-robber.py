@@ -42,6 +42,17 @@ def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python l
         assert(pos2 >= (pos1+1))
 
 
+
+
+
+
+
+
+
+
+
+
+
 ############################################################
 # Exam.py 
 # Author: Jagadeesh Vasudevamurthy
@@ -92,119 +103,106 @@ class Alg():
         check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
 
     ############################################################
-    #  Time Complexity: O(2^n)
-    #  Space Complexity: O(n)
+    #          WRITE CODE BELOW
+    
+    #Brute Force Implementation using Recursion
     ########################################################### 
+#     def _alg1(self):
+#             if not self._a:
+#                 self._work[0] = 1
+#                 self._maxv[0] = 0
+#                 return
+
+#             n = len(self._a)
+#             self._work[0] = 0
+#             max_total = 0
+#             best_path = []
+#             for mask in range(1 << n):
+#                 self._work[0] += 1
+#                 current_total = 0
+#                 current_path = []
+#                 valid = True
+#                 for i in range(n):
+#                     if mask & (1 << i):
+#                         if i > 0 and mask & (1 << (i-1)):
+#                             valid = False
+#                             break
+#                         current_total += self._a[i]
+#                         current_path.append(i)
+
+#                 if valid and current_total > max_total:
+#                     max_total = current_total
+#                     best_path = current_path
+
+#             self._maxv[0] = max_total
+#             self._ans[:] = best_path
+
+#             if self._show:
+#                 print(f"Work = {self._work[0]}, Max Value = {self._maxv[0]}, Selected Indices = {self._ans}")
+    
     def _alg1(self):
-        stepCounter = [1]
-        def maxSumRec(arr, n, indices):
-            # Increment work counter
-            self._work[0] += 1
-            # Base cases
-            if n <= 0:
-                return 0, []
-            if n == 1:
-                return arr[0], [0]
-            # Recursion: pick or not pick
-            pick_sum, pick_indices = maxSumRec(arr, n - 2, indices)
-            self._work[0] += 1
-            pick_sum += arr[n - 1]
-            pick_indices = pick_indices + [n - 1]
-            
-            not_pick_sum, not_pick_indices = maxSumRec(arr, n - 1, indices)
-            
-            if pick_sum > not_pick_sum:
-                
-                if self._show:
-                    print(stepCounter[0], " : " , pick_indices, " = ", pick_sum)
-                    stepCounter[0] += 1
-                    
-                return pick_sum, pick_indices
-            else:
-
-                if self._show:
-                    print(stepCounter[0], " : " , not_pick_indices, " = ", not_pick_sum)
-                    stepCounter[0] += 1
-
-                return not_pick_sum, not_pick_indices
-
-        # Calculate the maximum sum and track indices
-        self._maxv[0], self._ans = maxSumRec(self._a, len(self._a), [])
-
+        def brute_force(index, selected, current_total):
+            nonlocal max_total, best_path
+            self._work[0] += 1  # Increment work counter
+            if index >= len(self._a):
+                if current_total > max_total:
+                    max_total = current_total
+                    best_path = selected[:]
+                return
+            brute_force(index + 1, selected, current_total)
+            brute_force(index + 2, selected + [index], current_total + self._a[index])    
         
-        print("----------- Alg 1 ------------")
-        print(f"maxv = {self._maxv[0]}")
-        print(f"ans = {self._ans}")
-        print(f"work = {self._work[0]}")
-        
-         
+        if not self._a:
+            self._work[0] = 1
+            self._maxv[0] = 0
+            return
+
+        max_total = 0
+        best_path = []
+        self._work[0] = 0  # Reset work counter
+        brute_force(0, [], 0)
+    
+        self._maxv[0] = max_total
+        self._ans.clear()
+        self._ans.extend(best_path)
+        if self._show:
+            print(f" Work = {self._work[0]}, Maximum Value = {self._maxv[0]}, Best Indices = {self._ans}")
+      
         
     ############################################################
-    #  Time Complexity: O(n)
-    #  Space Complexity: O(1)
+    #          WRITE CODE BELOW
+    
+    # The optimal solution uses Dynamic Programming
     ########################################################### 
     def _alg2(self):
-        stepCounter = 1
         n = len(self._a)
         if n == 0:
+            self._work[0] = 1
             self._maxv[0] = 0
-            self._ans = []
-            self._work[0] += 1
-            
-            print("----------- Alg 2 ------------")
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
-            return
-        
-        if n == 1:
-            self._maxv[0] = self._a[0]
-            self._ans = [0]
-            self._work[0] += 1
-            
-            print("----------- Alg 2 ------------")
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
             return
 
-        # DP variables
-        self._work[0] += 1
-        secondLast = 0
-        secondLastIndices = []
+        self._work[0] = 0  # Reset work counter
 
-        last = self._a[0]
-        lastIndices = [0]
-        res = 0
+        optimal = [0] * (n + 1)
+        optimal_track = [[] for _ in range(n + 1)]
 
-        # Iterate through the array
-        for i in range(1, n):
-            self._work[0] += 1
-            
-            if self._a[i] + secondLast > last:
-                res = self._a[i] + secondLast
-                currentIndices = secondLastIndices + [i]
+        for i in range(1, n + 1):
+            self._work[0] += 1  # Track computational work
+            if optimal[i - 1] >= self._a[i - 1] + (optimal[i - 2] if i > 1 else 0):
+                optimal[i] = optimal[i - 1]
+                optimal_track[i] = optimal_track[i - 1][:]
             else:
-                res = last
-                currentIndices = lastIndices
-            if self._show:
-                print(stepCounter, " : " , currentIndices, " = ", res)
-                stepCounter += 1
-            
-            secondLast = last
-            secondLastIndices = lastIndices
-            last = res
-            lastIndices = currentIndices
+                optimal[i] = self._a[i - 1] + (optimal[i - 2] if i > 1 else 0)
+                optimal_track[i] = optimal_track[i - 2][:] if i > 1 else []
+                optimal_track[i].append(i - 1)
 
-        self._maxv[0] = res
+        self._maxv[0] = optimal[n]
+        self._ans.clear()
+        self._ans.extend(optimal_track[n])
 
-        self._ans = lastIndices
+        if self._show:
+            print(f" Work = {self._work[0]}, Maximum Value = {self._maxv[0]}, Best Indices = {self._ans}")
 
-        
-        print("----------- Alg 2 ------------")
-        print(f"maxv = {self._maxv[0]}")
-        print(f"ans = {self._ans}")
-        print(f"work = {self._work[0]}")
   
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
@@ -217,5 +215,3 @@ class Alg():
 def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
-    
- 
