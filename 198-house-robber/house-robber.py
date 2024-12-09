@@ -80,7 +80,7 @@ class Alg():
     def _exam(self):
         alg1_ans = []
         alg1_max = [0]
-        if (len(self._a) < 25):
+        if (len(self._a) < 16):
           self._alg1()
           assert(self._work[0])
           #your answer is checked here after exam
@@ -112,11 +112,11 @@ class Alg():
         def calculate_max_sum(idx, selected, current_sum):
             # Increment work count
             self._work[0] += 1 
-            # print(f"Step {self._work[0]}: idx = {idx}, selected = {selected}, current_sum = {current_sum}")
+            print(f"Step {self._work[0]}: idx = {idx}, selected = {selected}, current_sum = {current_sum}")
  
             if idx >= n:
                 if current_sum > self._maxv[0]:
-                    # print(f"Updating _maxv from {self._maxv[0]} to {current_sum}, _ans to {selected}")
+                    print(f"Updating _maxv from {self._maxv[0]} to {current_sum}, _ans to {selected}")
                     self._maxv[0] = current_sum
                     self._ans[:] = selected[:]
                 return
