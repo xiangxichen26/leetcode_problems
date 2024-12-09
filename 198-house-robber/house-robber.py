@@ -67,142 +67,145 @@ def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python l
 #  class  Alg
 ###########################################################    
 class Alg():
-    def __init__(self, a: 'python list', ans: 'python list', maxv: 'list of size 1', work: 'list of size 1', show: 'bool'):
+    def __init__(self,a:'python list',ans:'python list',maxv:'list of size 1',work:'list of size 1',show:'bool'):
         ## Nothing can be changed below
         self._a = a
         self._ans = ans
         self._maxv = maxv
         self._work = work
         self._show = show
-        self._exam()  # Everything happens in _exam
-
+        self._exam() #Everything happens in _exam
+        
     ############################################################
     #          Nothing can be changed in _exam
     ########################################################### 
     def _exam(self):
         alg1_ans = []
         alg1_max = [0]
-        if len(self._a) < 25:
-            self._alg1()
-            assert self._work[0]
-            # your answer is checked here after exam
-            check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
-            for e in self._ans:
-                alg1_ans.append(e)
-            alg1_max[0] = self._maxv[0]
-            self._ans.clear()
-            self._maxv[0] = 0
-            self._work[0] = 0
+        if (len(self._a) < 25):
+          self._alg1()
+          assert(self._work[0])
+          #your answer is checked here after exam
+          check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
+          
+          for e in self._ans:
+            alg1_ans.append(e)
+          alg1_max[0] = self._maxv[0]
+          self._ans.clear()
+          
+          self._maxv[0] = 0 
+          self._work[0] = 0
 
-        # always run alg2
+        #always run alg2
         self._alg2()
-        assert self._work[0]
-        # your answer is checked here after exam
-        check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
+        assert(self._work[0])
+        #your answer is checked here after exam
+        check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
 
     ############################################################
-    # Brute Force Implementation with Show
+    #          WRITE CODE BELOW
     ########################################################### 
     def _alg1(self):
-        if len(self._a)==0:  # Handle empty array
-            self._maxv[0] = 0
-            self._ans.clear()
-            self._work[0]+=1
-            if self._show:
-                print(f"Alg1 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
-            return
-        
-        def helper(index, current_sum, path):
-            self._work[0] += 1 
-            if self._show:
-                print(f"Alg1 Iteration: index={index}, current_sum={current_sum}, path={path}, maxv={self._maxv[0]}")
-
-            # Base case
-            if index >= len(self._a):
-                # Update max value and solution path
-                if current_sum > self._maxv[0]:
-                    self._maxv[0] = current_sum
-                    self._ans.clear()
-                    self._ans.extend(path)
-                    if self._show:
-                        print(f"Updated maxv: {self._maxv[0]}, ans: {self._ans}, work={self._work[0]}")
+        def helper(idx, selected_indices, current_sum):
+            nonlocal max_sum, optimal_indices, operation_count
+    
+            
+            operation_count += 1
+    
+           
+            if idx == total_indices:
+                if current_sum > max_sum:
+                    max_sum = current_sum
+                    optimal_indices = selected_indices[:]
                 return
-
-            # Choose the current index
-            helper(index + 2, current_sum + self._a[index], path + [index])
-            # Skip the current index
-            helper(index + 1, current_sum, path)
-
-        helper(0, 0, [])
-
-        # Final output
+    
+           
+            helper(idx + 1, selected_indices, current_sum)
+    
+            
+            if not selected_indices or selected_indices[-1] != idx - 1:  
+                selected_indices.append(idx)
+                helper(idx + 1, selected_indices, current_sum + self._a[idx])
+                selected_indices.pop()  
+    
+        total_indices = len(self._a)
+        max_sum = 0
+        optimal_indices = []
+        operation_count = 0
+    
+      
+        helper(0, [], 0)
+    
+       
+        self._ans.extend(optimal_indices)
+        self._maxv[0] = max_sum
+        self._work[0] = operation_count
+    
         if self._show:
-            print(f"Alg1 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
-
-
+            print("Brute Force Results:")
+            print(f"Max Marks: {max_sum}")
+            print(f"Selected Indices: {optimal_indices}")
+            print(f"Work Done: {operation_count}")
+             
+        
     ############################################################
-    # Using Dynamic Programming to Implement  prob
+    #          WRITE CODE BELOW
     ########################################################### 
     def _alg2(self):
-        if len(self._a)==0:  # Handle empty array
-            self._maxv[0] = 0
-            self._ans.clear()
-            self._work[0]+=1
-            if self._show:
-                print(f"Alg2 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+        total_items = len(self._a)
+        if total_items == 0:
             return
+    
+        dp_table = [0] * total_items
+        include_item = [False] * total_items
+        operation_count = 0
+    
+       
+        dp_table[0] = self._a[0]
+        if total_items > 1:
+            dp_table[1] = max(self._a[0], self._a[1])
+            include_item[1] = self._a[1] > self._a[0]
+        operation_count += 2
+    
         
-        n = len(self._a)
-        if n == 0:
-            self._maxv[0] = 0
-            return
-
-        dp = [0] * n
-        prev = [None] * n  
-
-        dp[0] = self._a[0]
-        prev[0] = [0]
-
-        self._work[0] += 1  
-
-        if n > 1:
-            if self._a[1] > self._a[0]:
-                dp[1] = self._a[1]
-                prev[1] = [1]
+        for idx in range(2, total_items):
+            operation_count += 1
+            if dp_table[idx - 1] > self._a[idx] + dp_table[idx - 2]:
+                dp_table[idx] = dp_table[idx - 1]
             else:
-                dp[1] = self._a[0]
-                prev[1] = [0]
-            self._work[0] += 1  
-
-        if self._show:
-            print(f"Alg2 Initialization: dp={dp}, take={prev}")
-
-        for i in range(2, n):
-            # Increment work once per loop iteration
-            self._work[0] += 1
-
-            if dp[i - 1] > dp[i - 2] + self._a[i]:
-                dp[i] = dp[i - 1]
-                prev[i] = prev[i - 1] 
+                dp_table[idx] = self._a[idx] + dp_table[idx - 2]
+                include_item[idx] = True
+    
+      
+        idx = total_items - 1
+        selected_indices = []
+        while idx >= 0:
+            operation_count += 1
+            if include_item[idx]:
+                selected_indices.append(idx)
+                idx -= 2
             else:
-                dp[i] = dp[i - 2] + self._a[i]
-                prev[i] = prev[i - 2] + [i]  
-
-            if self._show:
-                print(f"Alg2 Iteration {i}: dp={dp}, take={prev}")
-
-        self._maxv[0] = dp[-1]
-        self._ans = prev[-1]
-
+                idx -= 1
+    
+      
+        self._ans.extend(reversed(selected_indices))
+        self._maxv[0] = dp_table[total_items - 1]
+        self._work[0] = operation_count
+    
         if self._show:
-            print(f"Alg2 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
-
+            print("Dynamic Programming Results:")
+            print(f"Max Marks: {dp_table[total_items - 1]}")
+            print(f"Selected Indices: {selected_indices}")
+            print(f"Work Done: {operation_count}")  
+ ############################################################
+#  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
+###########################################################  
 
 ############################################################
 # Nothing can be changed in check_result
 # Note check_result is a global hanging function
 ###########################################################  
-def check_result(a: 'Python list', ans: 'Python List', amax: 'int', alg1_ans: 'Python list', alg1_max: 'int'):
+def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
     
