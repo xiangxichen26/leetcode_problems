@@ -67,157 +67,142 @@ def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python l
 #  class  Alg
 ###########################################################    
 class Alg():
-    def __init__(self,a:'python list',ans:'python list',maxv:'list of size 1',work:'list of size 1',show:'bool'):
+    def __init__(self, a: 'python list', ans: 'python list', maxv: 'list of size 1', work: 'list of size 1', show: 'bool'):
         ## Nothing can be changed below
         self._a = a
         self._ans = ans
         self._maxv = maxv
         self._work = work
         self._show = show
-        self._exam() #Everything happens in _exam
-        
+        self._exam()  # Everything happens in _exam
+
     ############################################################
     #          Nothing can be changed in _exam
     ########################################################### 
     def _exam(self):
         alg1_ans = []
         alg1_max = [0]
-        if (len(self._a) < 25):
-          self._alg1()
-          assert(self._work[0])
-          #your answer is checked here after exam
-          check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
-          
-          for e in self._ans:
-            alg1_ans.append(e)
-          alg1_max[0] = self._maxv[0]
-          self._ans.clear()
-          
-          self._maxv[0] = 0 
-          self._work[0] = 0
+        if len(self._a) < 25:
+            self._alg1()
+            assert self._work[0]
+            # your answer is checked here after exam
+            check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
+            for e in self._ans:
+                alg1_ans.append(e)
+            alg1_max[0] = self._maxv[0]
+            self._ans.clear()
+            self._maxv[0] = 0
+            self._work[0] = 0
 
-        #always run alg2
+        # always run alg2
         self._alg2()
-        assert(self._work[0])
-        #your answer is checked here after exam
-        check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
+        assert self._work[0]
+        # your answer is checked here after exam
+        check_result(self._a, self._ans, self._maxv[0], alg1_ans, alg1_max[0])
 
     ############################################################
-    #          WRITE CODE BELOW
+    # Brute Force Implementation with Show
     ########################################################### 
     def _alg1(self):
-        n = len(self._a)
-        a = self._a
-        def generate_combinations(index, current_combination):
-            self._work[0] += 1
-            if index >= n:
-                subset_sum = sum(a[i] for i in current_combination)
-                if self._show:
-                    print(f"{current_combination} = {subset_sum}")
-                return
+        if len(self._a)==0:  # Handle empty array
+            self._maxv[0] = 0
+            self._ans.clear()
+            self._work[0]+=1
+            if self._show:
+                print(f"Alg1 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+            return
         
-            generate_combinations(index + 2, current_combination + [index])
-            generate_combinations(index + 1, current_combination)
-        
-        generate_combinations(0, [])
-        def helper(index):
-            if index < 0:
-                return (0, [])
-            
-            include_sum, include_indices = helper(index - 2)
-            include_sum += a[index]
-            include_indices = include_indices + [index]
-            
-            exclude_sum, exclude_indices = helper(index - 1)
-            
-            if include_sum > exclude_sum:
-                return include_sum, include_indices
-            else:
-                return exclude_sum, exclude_indices
-        
-        total, indices = helper(n - 1)
-        self._maxv[0] = total
-        self._ans.extend(indices)
+        def helper(index, current_sum, path):
+            self._work[0] += 1 
+            if self._show:
+                print(f"Alg1 Iteration: index={index}, current_sum={current_sum}, path={path}, maxv={self._maxv[0]}")
 
+            # Base case
+            if index >= len(self._a):
+                # Update max value and solution path
+                if current_sum > self._maxv[0]:
+                    self._maxv[0] = current_sum
+                    self._ans.clear()
+                    self._ans.extend(path)
+                    if self._show:
+                        print(f"Updated maxv: {self._maxv[0]}, ans: {self._ans}, work={self._work[0]}")
+                return
+
+            # Choose the current index
+            helper(index + 2, current_sum + self._a[index], path + [index])
+            # Skip the current index
+            helper(index + 1, current_sum, path)
+
+        helper(0, 0, [])
+
+        # Final output
         if self._show:
-            print('----------------------------------------------')
-            print('Algorithm - 1 (Brute Force)')
-            print("Complexity Time: O(2^n * n) Space:O(n)")
-            print('----------------------------------------------')
-            print(f"maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")    
-            print('----------------------------------------------')
+            print(f"Alg1 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+
+
     ############################################################
-    #          WRITE CODE BELOW
+    # Using Dynamic Programming to Implement  prob
     ########################################################### 
     def _alg2(self):
+        if len(self._a)==0:  # Handle empty array
+            self._maxv[0] = 0
+            self._ans.clear()
+            self._work[0]+=1
+            if self._show:
+                print(f"Alg2 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+            return
+        
         n = len(self._a)
         if n == 0:
             self._maxv[0] = 0
-            self._work[0] += 1
-            return
-        elif n == 1:
-            self._maxv[0] = self._a[0]
-            self._ans.append(0)
-            self._work[0] += 1
             return
 
         dp = [0] * n
-        prev = [-1] * n
+        prev = [None] * n  
 
         dp[0] = self._a[0]
-        dp[1] = max(self._a[0], self._a[1])
-        prev[0] = -1
-        prev[1] = 0 if self._a[0] >= self._a[1] else -1
-        self._work[0] += 2
+        prev[0] = [0]
 
-        for i in range(2, n):
-            self._work[0] += 1
-            if dp[i-1] > dp[i-2] + self._a[i]:
-                dp[i] = dp[i-1]
-                prev[i] = prev[i-1]
+        self._work[0] += 1  
+
+        if n > 1:
+            if self._a[1] > self._a[0]:
+                dp[1] = self._a[1]
+                prev[1] = [1]
             else:
-                dp[i] = dp[i-2] + self._a[i]
-                prev[i] = i-2
-
-        self._maxv[0] = dp[-1]
-        self._ans.clear()
-        i = n - 1
-        indices = []
-
-        while i >= 0:
-            self._work[0] += 1
-            if i == 0:
-                indices.append(0)
-                break
-            if dp[i] == dp[i-1]:
-                i -= 1
-            else:
-                indices.append(i)
-                i -= 2
-
-        indices.reverse()
-        self._ans.extend(indices)
+                dp[1] = self._a[0]
+                prev[1] = [0]
+            self._work[0] += 1  
 
         if self._show:
-            print('----------------------------------------------')
-            print('Algorithm - 2')
-            print("Complexity Time: O(n) Space:O(n)")
-            print('----------------------------------------------')
-            print(f"{indices} : {self._maxv[0]}")
-            print(f"maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
-            print('----------------------------------------------')
+            print(f"Alg2 Initialization: dp={dp}, take={prev}")
 
-        self._work[0] += 1
-  
- ############################################################
-#  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
-###########################################################  
+        for i in range(2, n):
+            # Increment work once per loop iteration
+            self._work[0] += 1
+
+            if dp[i - 1] > dp[i - 2] + self._a[i]:
+                dp[i] = dp[i - 1]
+                prev[i] = prev[i - 1] 
+            else:
+                dp[i] = dp[i - 2] + self._a[i]
+                prev[i] = prev[i - 2] + [i]  
+
+            if self._show:
+                print(f"Alg2 Iteration {i}: dp={dp}, take={prev}")
+
+        self._maxv[0] = dp[-1]
+        self._ans = prev[-1]
+
+        if self._show:
+            print(f"Alg2 Final: maxv={self._maxv[0]}, ans={self._ans}, work={self._work[0]}")
+
 
 ############################################################
 # Nothing can be changed in check_result
 # Note check_result is a global hanging function
 ###########################################################  
-def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python list',alg1_max:'int'):
+def check_result(a: 'Python list', ans: 'Python List', amax: 'int', alg1_ans: 'Python list', alg1_max: 'int'):
     print("Checking routine will be added after exam")
     print("Be careful. May fail if not filled properly")
     
