@@ -52,7 +52,6 @@ def check_result(a:'Python list',ans:'Python List',amax:'int',alg1_ans:'Python l
 
 
 
-
 ############################################################
 # Exam.py 
 # Author: Jagadeesh Vasudevamurthy
@@ -102,123 +101,97 @@ class Alg():
         #your answer is checked here after exam
         check_result(self._a,self._ans,self._maxv[0],alg1_ans,alg1_max[0]) 
 
+    ############################################################
+    #          WRITE CODE BELOW
+    ########################################################### 
     def _alg1(self):
-        """
-        Brute force approach
-        """
-        def backtrack(index, current_sum, current_indices):
-            self._work[0] += 1
-            
-            # Base case: reached end of array
-            if index >= len(self._a):
-                if current_sum > self._maxv[0]:
-                    self._maxv[0] = current_sum
-                    self._ans.clear()
-                    self._ans.extend(current_indices)
-                    if self._show:
-                        print(f"{len(current_indices)} : {current_indices} = {current_sum}")
-                return
-            
-            # Skip current exam
-            backtrack(index + 1, current_sum, current_indices)
-            
-            # Take current exam (if valid)
-            new_indices = current_indices.copy()
-            new_indices.append(index)
-            if self._show:
-                print(f"{len(new_indices)} : {new_indices} = {current_sum + self._a[index]}")
-            backtrack(index + 2, current_sum + self._a[index], new_indices)
 
-            '''Work Calculation Assumptions:
-1. Brute Force Algorithm (_alg1):
-   * Count each recursive call as 1 unit of work
-   * Work increments with each state exploration regardless of whether we take or skip an exam
-   * For empty arrays, set work to 1 to pass assertion'''
-        
-        if self._show:
-            print("------- Alg 1 -----------")
-            print(list(range(len(self._a))))
-            print(self._a)
-        backtrack(0, 0, [])
-        if self._show:
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
-
-    def _alg2(self):
-        """
-        Dynamic Programming approach with step logging
-        """
-        if self._show:
-            print("------- Alg 2 -----------")
-            print(list(range(len(self._a))))
-            print(self._a)
-            
         n = len(self._a)
+        self._ans.clear()
+        self._maxv[0] = 0
+        self._work[0] = 0
+ 
+        def helper(index, selected, currSum):
+            self._work[0] += 1  # incrementing work everytime the function is called
+            if index >= n:
+                if currSum > self._maxv[0]:
+                    self._maxv[0] = currSum
+                    self._ans[:] = selected[:]
+                return
+            # skipping current index
+            helper(index + 1, selected, currSum)
+            # choosing current index
+            if not selected or selected[-1] != index - 1:
+                helper(index + 1, selected + [index], currSum + self._a[index])
+ 
+        helper(0, [], 0)
+ 
+        if self._show:
+            print("======= Algorithm 1 =======")
+            print("Maximum Value, maxv:", self._maxv[0])
+            print("Selected Indices, ans:", self._ans)
+            print("Work Done (Steps), work:", self._work[0])
+            print("===========================")
+        
+    ############################################################
+    #          WRITE CODE BELOW
+    ########################################################### 
+    def _alg2(self):
+
+        n = len(self._a)
+
         if n == 0:
             self._maxv[0] = 0
             self._ans.clear()
-            self._work[0] = 1  # Set to 1 for empty array to pass assertion
+            self._work[0] = 1
+            if self._show:
+                print("======= Algorithm 2 =======")
+                print("Maximum Value:", self._maxv[0])
+                print("Selected Indices:", self._ans)
+                print("Work Done (Steps):", self._work[0])
+                print("===========================")
             return
-        
-        # Initialize DP arrays
-        dp = [0] * n  # dp[i] stores the max sum we can achieve up to index i
-        selected_indices = [[] for _ in range(n)]  # Tracks the selected indices for dp[i]
-        self._work[0] = 0
-        
-        # Base case: First element
-        dp[0] = self._a[0]
-        if self._a[0] > 0:
-            selected_indices[0] = [0]
-        self._work[0] += 1
-        if self._show:
-            print(f"1 : {selected_indices[0]} = {dp[0]}")
 
-        '''2. Dynamic Programming Algorithm (_alg2):
-   * Count initialization of base cases as 1 unit each
-   * Count each position processing as 1 unit of work
-   * For n elements, expect approximately n+2 work units (base cases + n-2 iterations)
-   * For empty arrays, set work to 1 to pass assertion'''    
-        
-        # Base case: Second element
-        if n > 1:
-            if self._a[0] > self._a[1]:
-                dp[1] = self._a[0]
-                selected_indices[1] = selected_indices[0][:]
+        self._work[0] = 0
+
+        # to store max values and their indices
+        prev1_max = 0  # max value at i-1
+        prev2_max = 0  # max value at i-2
+        prev1_indices = []  # indices for i-1
+        prev2_indices = []  # indices for i-2
+
+
+        for i in range(n):
+            self._work[0] += 1  # incrementing work counter for each index
+            
+            if prev1_max > prev2_max + self._a[i]:
+                # skipping current index
+                current_max = prev1_max
+                current_indices = prev1_indices[:]
             else:
-                dp[1] = self._a[1]
-                if self._a[1] > 0:
-                    selected_indices[1] = [1]
-            self._work[0] += 1
-            if self._show:
-                print(f"2 : {selected_indices[1]} = {dp[1]}")
-        
-        # Fill the DP table
-        for i in range(2, n):
-            self._work[0] += 1
-            old_indices = selected_indices[i-1][:] if dp[i-1] > dp[i-2] + self._a[i] else selected_indices[i-2][:]
-            if dp[i - 1] > dp[i - 2] + self._a[i]:
-                dp[i] = dp[i - 1]
-                selected_indices[i] = selected_indices[i - 1][:]
-            else:
-                dp[i] = dp[i - 2] + self._a[i]
-                if self._a[i] > 0:
-                    selected_indices[i] = selected_indices[i - 2] + [i]
-                else:
-                    selected_indices[i] = selected_indices[i - 2][:]
-            if self._show:
-                print(f"{i+1} : {selected_indices[i]} = {dp[i]}")
-        
-        # The maximum value is at the last index
-        self._maxv[0] = dp[-1]
-        self._ans[:] = selected_indices[-1]
-        
+                # including the current index if it improves the sum
+                current_max = prev2_max + self._a[i]
+                current_indices = prev2_indices + [i]
+
+            # updating previous values for the next iteration
+            prev2_max, prev2_indices = prev1_max, prev1_indices
+            prev1_max, prev1_indices = current_max, current_indices
+
+        # assigning the final maximum value and selected indices
+        self._maxv[0] = prev1_max
+        self._ans[:] = prev1_indices
+
+        # ensuring we include only contributing indices
+        self._ans = [idx for idx in self._ans if self._a[idx] > 0]
+
         if self._show:
-            print(f"maxv = {self._maxv[0]}")
-            print(f"ans = {self._ans}")
-            print(f"work = {self._work[0]}")
-    
- ############################################################
+            print("======= Algorithm 2 =======")
+            print("Maximum Value, maxv:", self._maxv[0])
+            print("Selected Indices, ans:", self._ans)
+            print("Work Done (Steps), work:", self._work[0])
+            print("===========================") 
+        
+############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
 
