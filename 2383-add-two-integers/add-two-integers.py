@@ -1,12 +1,126 @@
 ############################################################
+# Int.py
+# Implements Int object
+# Author: Jagadeesh Vasudevamurthy
+# Copyright: Jagadeesh Vasudevamurthy 2025
+# added to git
+###########################################################
+
+
+###########################################################
+#  class  Int
+###########################################################
+class Int:
+    def __init__(self, n: "Python int" = 0):
+        # ONLY DATA STRUCTURE ALLOWED
+        # self._positive
+        # self._a
+        self._positive = True
+        if n < 0:
+            self._positive = False
+        self._a = self.build(n)
+
+    def _get_key(self)->'List of int':
+        return self._a
+
+    #############################
+    # WRITE All public functions BELOW
+    # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
+    #############################
+
+    #############################
+    # -1986 is returned as [1, 9, 8, 6]
+    # 1986  is returned as [1, 9, 8, 6]
+    # -100  is returned as [1, 0, 0]
+    # -0    is returned as [0]
+    # TIME:O(log to base 10 of n)
+    # SPACE:O(log to base 10 of n)
+    #############################
+    def build(self, n: "Python int") -> "list of int":
+        
+        if n == 0:
+            return [0]
+        
+        start = abs(n)
+        result_list = []
+
+        while start > 0:
+            result_list.append(start % 10)
+            start //= 10
+
+        result_list.reverse()
+
+        return result_list
+
+    #############################
+        # -1986 is stored as 1 9 8 6
+        # 0 1 2 3
+        # 1 9 8 6
+        # return int value 1986
+        # TIME:O(log to base 10 of n)
+        # SPACE:O(log to base 10 of n)
+        #############################
+    def int(self) -> "Python integer":
+        result = 0
+
+        for k in self._a:
+            result = result * 10 + k
+
+        if not self._positive:
+                result = - result
+
+        return result
+    
+    def __len__(self):
+        return len(self._a)
+
+    def __getitem__(self, index: int) -> int:
+        return self._a[index]
+
+    def __setitem__(self, index: int, value: int):
+        if not 0 <= value <= 9:
+            raise ValueError("Each digit must be between 0 and 9.")
+        self._a[index] = value
+
+    def __str__(self) -> str:
+        sign = "-" if not self._positive else ""
+        return sign + "".join(map(str, self._a))
+
+    def __add__(self, other: "Int") -> "Int":
+        a = self.int()
+        b = other.int()
+        return Int(a + b)
+
+    def __sub__(self, other: "Int") -> "Int":
+        a = self.int()
+        b = other.int()
+        return Int(a - b)
+
+    def __mul__(self, other: "Int") -> "Int":
+        a = self.int()
+        b = other.int()
+        return Int(a * b)
+        
+
+    ##############################################################
+    # WRITE All private functions BELOW
+    # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
+    ##############################################################
+    def __eq__(self, other: 'Int') -> bool:
+        if not isinstance(other, Int):
+            return False
+        return self._get_key() == other._get_key() and self._positive == other._positive
+
+############################################################
 # Exam.py
 # Author: Jagadeesh Vasudevamurthy
 # Copyright: Jagadeesh Vasudevamurthy 2024
 ###########################################################
 
 ############################################################
-#  NOTHING CAN BE CHANGED BELOW
+# NOTHING CAN BE CHANGED BELOW
 ###########################################################
+
 class Solution:
     def sum(self, a: int, b: int) -> int:
         ea = a + b
@@ -15,379 +129,92 @@ class Solution:
         mb = Int(b)
         tmb = Int(b)
         mc = Int()
-        s = Exam(ma,mb,mc)
+        s = Exam(ma, mb, mc)
         ans = mc.int()
+        print(ea)
+        print(ans)
         assert(ans == ea)
         assert(ma == tma)
         assert(mb == tmb)
         return ans
 
 ########################################
-#Nothing can be changed in class Exam
+# Nothing can be changed in class Exam
 ########################################
+
 class Exam:
-    def __init__(self, a:'Int', b:'Int', ans:'Int')->'None':
-        #NOTHING CAN BE CHANGED BELOW
+    def __init__(self, a: 'Int', b: 'Int', ans: 'Int') -> 'None':
+        # NOTHING CAN BE CHANGED BELOW
         self._a = a
         self._b = b
-        self._ans = ans 
+        self._ans = ans
         self._alg()
 
-    def _alg(self)->'None':
-        j=len(self._a)-1
-        k=len(self._b)-1
-        
-       # self._ans = Int()
-       # self._ans = [0] * max(len(self._a), len(self._b) + 1)
-        y=0
-        a1=self._a.int()
-        b1=self._b.int()
-        if (a1 >=0 and b1>=0) or (a1<0 and b1<0):
-            if j<k:
-                while j >= 0:
-                    x = self._a[j] + self._b[k] + y
-                    self._ans.append(x % 10)
-                    if x >= 10: 
-                        y=1
-                    else:
-                        y=0
-                    j -= 1
-                    k -= 1
-                
-                while k >= 0:
-                    if y > 0:
-                        x = self._b[k] + 1
-                        y = 0
-                    else:
-                        x = self._b[k]
-                    self._ans.append(x)
-                    k -= 1
-                
-            elif j == k:
-                while j >= 0:
-                    x = self._a[j] + self._b[j] + y
-                    self._ans.append(x % 10)
-                    if x >= 10: 
-                        y=1
-                    else:
-                        y=0
-                    j -= 1
-                
-                if y>0:
-                    self._ans.append(1)
-                    
-            elif j>k:
-                while k>=0:
-                    x=self._a[j]+self._b[k]+y
-                    self._ans.append(x%10)
-                    if x >= 10:
-                        y = 1
-                    else:
-                        y = 0
-                    j -= 1
-                    k -= 1
-                
-                while j>=0:
-                    if y>0:
-                        x=self._a[j]+y
-                        if x>=10:
-                            y=1
-                        else:
-                            y=0
-                    else:
-                        x=self._a[j]
-                    self._ans.append(x%10)
-                    j -= 1
-                   
-                if y>0:
-                    self._ans.append(1)
-                    
-                      
-            if a1 >= 0 and b1 >= 0:
-                self._ans.positive(True)
-            else:
-                self._ans.positive(False)
-        
-        elif a1>=0 and b1<0 :
-            if j<k:
-                self._ans.positive(False)
-                while j>=0:
-                    x=self._b[k]-self._a[j]-y
-                    if x >= 0:
-                        y = 0 
-                    else:
-                        y = 1
-                        x = x+10
-                    self._ans.append(x)    
-                    j -= 1
-                    k -= 1
-                
-                while k>=0:
-                    if y>0:
-                        x=self._b[k]-1
-                        if x<0:
-                            y=1
-                            x=x+10
-                        else:
-                            y=0
-                    else:
-                        x=self._b[k]
-                    self._ans.append(x)
-                    k -= 1
-              
-            elif j>k:
-                self._ans.positive(True)
-                while k>0 or k==0:
-                    x=self._a[j]-self._b[k]-y
-                    if x >= 0:
-                        y = 0 
-                    else:
-                        y = 1
-                        x = x+10
-                    self._ans.append(x)    
-                    j -= 1
-                    k -= 1
-                
-                while j>=0:
-                    if y>0:
-                        x=self._a[j]-y
-                        if x<0:
-                            y=1
-                            x=x+10
-                        else:
-                            y=0
-                    else:
-                        x=self._a[j]
-                    self._ans.append(x) 
-                    j -= 1
-           
-            elif j==k:
-                b1=-b1
-                if a1>=b1:
-                    self._ans.positive(True)
-                    
-                    while j>=0:
-                        x=self._a[j]-self._b[j]-y
-                        if x >= 0:
-                            y = 0 
-                        else:
-                            y = 1
-                            x = x+10
-                        self._ans.append(x) 
-                        j -= 1
-                    
-    
-                elif a1<b1:
-                    self._ans.positive(False)
-                    
-                    while j>=0:
-                        x=self._b[k]-self._a[j]-y
-                        if x >= 0:
-                            y = 0 
-                        else:
-                            y = 1
-                            x = x+10
-                        self._ans.append(x) 
-                        j -= 1
-                        k -= 1
+    def _alg(self) -> 'None':
+        # when both positive or negative
+        if self._a._positive == self._b._positive:
+            list_a = self._a._get_key()
+            list_b = self._b._get_key()
 
-                    while k>=0:                                  
-                        if y>0:
-                            x=self._b[k]-1
-                            if x<0:
-                                x=x+10
-                                y=1
-                            else:
-                                y=0
-                        else:
-                            x=self._b[k]
-                        self._ans.append(x) 
-                        k -= 1
-       
-        elif a1<0 and b1>=0 :
-            if j<k:
-                self._ans.positive(True)
-                while j>=0:
-                    x=self._b[k]-self._a[j]-y
-                    if x >= 0:
-                        y = 0 
-                    else:
-                        y = 1
-                        x = x+10
-                    self._ans.append(x)     
-                    j -= 1
-                    k -= 1
-                
-                while k>=0:
-                    if y>0:
-                        x=self._b[k]-1
-                        if x<0:
-                            y=1
-                            x=x+10
-                        else:
-                            y=0
-                    else:
-                        x=self._b[k]
-                    self._ans.append(x)  
-                    k -= 1
-              
-            elif j>k:
-                self._ans.positive(False)
-                while k>=0:
-                    x=self._a[j]-self._b[k]-y
-                    if x >= 0:
-                        y = 0 
-                    else:
-                        y = 1
-                        x = x+10
-                    self._ans.append(x)       
-                    j -= 1
-                    k -= 1
-                
-                while j>=0:
-                    print(y) 
-                    if y>0:
-                        x=self._a[j]-y
-                        if x<0:
-                            x=x+10
-                            y=1
-                        else:
-                            y=0
-                    else:
-                        x=self._a[j]
-                    self._ans.append(x)   
-                    j -= 1
-           
-            elif j==k:
-                a1=-a1
-                if a1>b1:
-                    self._ans.positive(False)
-                    
-                    while j>=0:
-                        x=self._a[j]-self._b[k]-y
-                        if x >= 0:
-                            y = 0 
-                        else:
-                            y = 1
-                            x = x+10
-                        self._ans.append(x)
-                        j -= 1
-                        k -= 1
-    
-                elif b1>=a1:
-                    self._ans.positive(True)
-                    
-                    while j>0 or j==0:
-                        x=self._b[k]-self._a[j]-y
-                        if x >= 0:
-                            y = 0 
-                        else:
-                            y = 1
-                            x = x+10
-                        self._ans.append(x) 
-                        j -= 1
-                        k -= 1
+            list_a.reverse()
+            list_b.reverse()
 
-                    while k>=0:                                  
-                        if y>0:
-                            x=self._b[k]-1
-                            if x<0:
-                                x=x+10
-                                y=1
-                            else:
-                                y=0
-                        else:
-                            x=self._b[k]
-                        self._ans.append(x) 
-                        k -= 1
+            carry = 0
+            result = []
 
-        return self._ans.reverse()
+            digit_length = max(len(list_b), len(list_a))
 
-############################################################
-# Int.py
-# Implements Int object
-# Author: Jagadeesh Vasudevamurthy
-# Copyright: Jagadeesh Vasudevamurthy 2025
-# added to git
-###########################################################
+            for i in range(digit_length):
+                a_value = list_a[i] if i < len(list_a) else 0
+                b_value = list_b[i] if i < len(list_b) else 0
+                digit_sum = a_value + b_value + carry
+                carry = digit_sum // 10
+                result.append(digit_sum % 10)
 
-class Int:
-    def __init__(self, n: "Python int" = None):
-        if n is None:
-            self._a = []
+            if carry > 0:
+                result.append(carry)
 
+            result.reverse()
+            list_a.reverse()
+            list_b.reverse()
+            self._ans._a = result
+            self._ans._positive = self._a._positive
         else:
-            self._positive = True
-            if n < 0:
-                 self._positive = False
-            self._a = self.build(n)
-
-    def _get_key(self)-> list[int]:
-        return self._a
-    
-    def positive(self, a: bool) -> 'None':
-        self._positive = a
-
-    def build(self, n) -> "list of int":
-        a=[]
-        
-        if n==0:
-            a.append(n)
-
-        elif n>0 or n<0:
-            if n<0:
-                n=-n 
-            while n>0:
-                a.append(n%10)
-                n=n//10
-            a.reverse()
-
-        elif n=='':
-            a=[]  
-        
-        return a 
-
-        
-    def append(self, value: int):
-        self._a.append(value)
-
-    def reverse(self):
-        self._a.reverse()
-        return self._a
-
-    def int(self) -> "Python integer":
-        n=self._a
-        x=0
-        i=0
-        
-        while i<len(n):
-            x=x*10+n[i]
-            i+=1
+            list_a = self._a._get_key()
+            list_b = self._b._get_key()
             
-        if self._positive == False:
-            x=-x
-        return x
-        
-    def __str__(self): 
-        return str(self._a)
-        
-    def __len__(self):
-        return len(self._a)
-
-    def __getitem__(self, index: "Python int"):
-        return self._a[index]
+            abs_a = abs(self._a.int())
+            abs_b = abs(self._b.int())
             
-    def __setitem__(self, index, value):
-        self._a[index] = value
+            list_a.reverse()
+            list_b.reverse()
 
-    def __eq__(self, other):
-        a = len(self._a)
-        b = len(other._a)
-        if a!=b:
-            return False
-        else:
-            i=0
-            for i in range(len(self._a)):
-                if self._a[i] != other._a[i]:
-                    return False
-        return True
+            carry = 0
+            result = []
+
+            digit_length = max(len(list_b), len(list_a))
+
+
+
+            for i in range(digit_length):
+                a_value = list_a[i] if i < len(list_a) else 0
+                b_value = list_b[i] if i < len(list_b) else 0
+                
+                if abs_a > abs_b:
+                    digit_sum = a_value - b_value - carry
+                else:
+                    digit_sum = b_value - a_value - carry
+
+                if digit_sum < 0:
+                    digit_sum += 10
+                    carry = 1
+                else:
+                    carry = 0
+
+                result.append(digit_sum)
+
+            result.reverse()
+            list_a.reverse()
+            list_b.reverse()
+            self._ans._a = result
+            self._ans._positive = self._a._positive if abs_a > abs_b else self._b._positive
