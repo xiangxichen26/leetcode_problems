@@ -1,4 +1,48 @@
 ############################################################
+# Exam.py
+# Author: Jagadeesh Vasudevamurthy
+# Copyright: Jagadeesh Vasudevamurthy 2025
+###########################################################
+
+############################################################
+# All imports
+##############################################5#############
+#from Int import *
+
+############################################################
+#  NOTHING CAN BE CHANGED BELOW
+###########################################################
+class Solution:
+    def sum(self, a: int, b: int) -> int:
+        ma = Int(a)
+        ma1 = Int(a)
+        mb = Int(b)
+        mb1 = Int(b)
+        mc = Int()
+        s = Exam(ma,mb,mc)
+        assert(ma == ma1)
+        assert(mb == mb1)
+        ans = mc.int()
+        return ans
+
+########################################
+#Nothing can be changed in class Exam
+########################################
+class Exam:
+    def __init__(self, a:'Int', b:'Int', ans:'Int')->'None':
+      #NOTHING CAN BE CHANGED BELOW
+      self._a = a
+      self._b = b
+      self._ans = ans 
+      self._alg()
+
+    def _alg(self)->'None':
+      self._ans._set_value(self._a + self._b)
+    # Time Complexity: Θ(log n)
+    # Space Complexity: Θ(log n) 
+
+
+############################################################
 # Int.py
 # Implements Int object
 # Author: Jagadeesh Vasudevamurthy
@@ -6,215 +50,180 @@
 # added to git
 ###########################################################
 
+############################################################
+# All imports
+###########################################################
+import copy  #For deepcopy
 
 ###########################################################
 #  class  Int
+# Write class Int
 ###########################################################
 class Int:
     def __init__(self, n: "Python int" = 0):
-        # ONLY DATA STRUCTURE ALLOWED
-        # self._positive
-        # self._a
         self._positive = True
         if n < 0:
             self._positive = False
         self._a = self.build(n)
 
-    def _get_key(self)->'List of int':
+    def _get_key(self)->"List of int":
         return self._a
 
-    #############################
-    # WRITE All public functions BELOW
-    # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
-    #############################
-
-    #############################
-    # -1986 is returned as [1, 9, 8, 6]
-    # 1986  is returned as [1, 9, 8, 6]
-    # -100  is returned as [1, 0, 0]
-    # -0    is returned as [0]
-    # TIME:O(log to base 10 of n)
-    # SPACE:O(log to base 10 of n)
-    #############################
     def build(self, n: "Python int") -> "list of int":
-        
-        if n == 0:
-            return [0]
-        
-        start = abs(n)
-        result_list = []
-
-        while start > 0:
-            result_list.append(start % 10)
-            start //= 10
-
-        result_list.reverse()
-
-        return result_list
-
-    #############################
-        # -1986 is stored as 1 9 8 6
-        # 0 1 2 3
-        # 1 9 8 6
-        # return int value 1986
-        # TIME:O(log to base 10 of n)
-        # SPACE:O(log to base 10 of n)
-        #############################
-    def int(self) -> "Python integer":
-        result = 0
-
-        for k in self._a:
-            result = result * 10 + k
-
-        if not self._positive:
-                result = - result
-
-        return result
-    
-    def __len__(self):
-        return len(self._a)
-
-    def __getitem__(self, index: int) -> int:
-        return self._a[index]
-
-    def __setitem__(self, index: int, value: int):
-        if not 0 <= value <= 9:
-            raise ValueError("Each digit must be between 0 and 9.")
-        self._a[index] = value
-
-    def __str__(self) -> str:
-        sign = "-" if not self._positive else ""
-        return sign + "".join(map(str, self._a))
-
-    def __add__(self, other: "Int") -> "Int":
-        a = self.int()
-        b = other.int()
-        return Int(a + b)
-
-    def __sub__(self, other: "Int") -> "Int":
-        a = self.int()
-        b = other.int()
-        return Int(a - b)
-
-    def __mul__(self, other: "Int") -> "Int":
-        a = self.int()
-        b = other.int()
-        return Int(a * b)
-        
-
-    ##############################################################
-    # WRITE All private functions BELOW
-    # YOU CAN HAVE ANY NUMBER OF PRIVATE FUNCTIONS YOU WANT
-    ##############################################################
-    def __eq__(self, other: 'Int') -> bool:
-        if not isinstance(other, Int):
-            return False
-        return self._get_key() == other._get_key() and self._positive == other._positive
-
-############################################################
-# Exam.py
-# Author: Jagadeesh Vasudevamurthy
-# Copyright: Jagadeesh Vasudevamurthy 2024
-###########################################################
-
-############################################################
-# NOTHING CAN BE CHANGED BELOW
-###########################################################
-
-class Solution:
-    def sum(self, a: int, b: int) -> int:
-        ea = a + b
-        ma = Int(a)
-        tma = Int(a)
-        mb = Int(b)
-        tmb = Int(b)
-        mc = Int()
-        s = Exam(ma, mb, mc)
-        ans = mc.int()
-        print(ea)
-        print(ans)
-        assert(ans == ea)
-        assert(ma == tma)
-        assert(mb == tmb)
-        return ans
-
-########################################
-# Nothing can be changed in class Exam
-########################################
-
-class Exam:
-    def __init__(self, a: 'Int', b: 'Int', ans: 'Int') -> 'None':
-        # NOTHING CAN BE CHANGED BELOW
-        self._a = a
-        self._b = b
-        self._ans = ans
-        self._alg()
-
-    def _alg(self) -> 'None':
-        # when both positive or negative
-        if self._a._positive == self._b._positive:
-            list_a = self._a._get_key()
-            list_b = self._b._get_key()
-
-            list_a.reverse()
-            list_b.reverse()
-
-            carry = 0
-            result = []
-
-            digit_length = max(len(list_b), len(list_a))
-
-            for i in range(digit_length):
-                a_value = list_a[i] if i < len(list_a) else 0
-                b_value = list_b[i] if i < len(list_b) else 0
-                digit_sum = a_value + b_value + carry
-                carry = digit_sum // 10
-                result.append(digit_sum % 10)
-
-            if carry > 0:
-                result.append(carry)
-
-            result.reverse()
-            list_a.reverse()
-            list_b.reverse()
-            self._ans._a = result
-            self._ans._positive = self._a._positive
+        if n < 0:
+            n = -n
+        l = []
+        if n < 10:
+            l.append(n)
         else:
-            list_a = self._a._get_key()
-            list_b = self._b._get_key()
-            
-            abs_a = abs(self._a.int())
-            abs_b = abs(self._b.int())
-            
-            list_a.reverse()
-            list_b.reverse()
+            while n != 0:
+                l.append(n % 10)
+                n = n // 10
+        self._reverse(l)
+        return l
+        
+    def int(self) -> "Python integer":
+        v = 0
+        for e in self._a:
+            v = 10 * v + e
+        if v == 0 or self._positive:
+            return v
+        return -v
+    
+    def _set_value(self, other: "Int") -> "None":
+        self._a = other._a
+        self._positive = other._positive
 
+    def __len__(self) -> "int":
+        return len(self._a)
+    
+    def __str__(self) -> "String":
+        n = self.int()
+        sign = "-"
+        if self._positive:
+            sign = "+"
+
+        s = str(n)
+        return s
+
+    def _reverse(self, l: "list of int") -> "None":
+        i = 0
+        j = len(l) - 1
+        while i < j:
+            t = l[i]
+            l[i] = l[j]
+            l[j] = t
+            i = i + 1
+            j = j -1
+
+    def __getitem__(self, pos) -> "int":
+        n = len(self)
+        assert pos >= 0 and pos < n
+        return self._a[pos]
+
+    def __setitem__(self, pos, v) -> "None":
+        n = len(self)
+        assert pos >= 0 and pos < n
+        self._a[pos] = v
+
+    def __eq__(self, other: "Int") -> "bool":
+        return self.int() == other.int() and self._positive == other._positive
+    
+    def __gt__(self, other: "Int") -> "bool":
+        return self.int() > other.int()
+
+    def _ripple_carry_adder(self, b: "Int") -> "Int":
+        l = []
+        a = self
+        pa = len(a) - 1
+        pb = len(b) - 1
+        
+        carry = 0
+        while (pa >= 0 or pb >= 0):
+            va = 0
+            if (pa >= 0):
+                va = a[pa]
+                pa = pa - 1
+            vb = 0
+            if (pb >= 0):
+                vb = b[pb]
+                pb = pb - 1
+            s = carry + va + vb
+            assert(s >= 0 and s < 20)
             carry = 0
-            result = []
+            if (s >= 10):
+                carry = 1
+            l.append(s % 10)
+        if (carry):
+            l.append(carry)
+        self._reverse(l)
+        c = Int(0)
+        c._a = l
+        return c
 
-            digit_length = max(len(list_b), len(list_a))
-
-
-
-            for i in range(digit_length):
-                a_value = list_a[i] if i < len(list_a) else 0
-                b_value = list_b[i] if i < len(list_b) else 0
-                
-                if abs_a > abs_b:
-                    digit_sum = a_value - b_value - carry
+    def __add__(self, b:"Int") -> "Int":
+        if (self._positive and b._positive):
+            r = self._ripple_carry_adder(b)
+        elif (self._positive == False and b._positive == False):
+            r = self._ripple_carry_adder(b)
+            r._positive = False
+        else:
+            if (self._positive == True and b._positive == False):
+                b._positive = True
+                if self > b:
+                    r = self.__sub__(b)
                 else:
-                    digit_sum = b_value - a_value - carry
-
-                if digit_sum < 0:
-                    digit_sum += 10
-                    carry = 1
+                    r = b.__sub__(self)
+                    r._positive = False
+                b._positive = False
+            else:
+                self._positive = True
+                if self > b:
+                    r = self.__sub__(b)
+                    r._positive = False
                 else:
-                    carry = 0
+                    r = b.__sub__(self)
+                self._positive = False
+        return r
+    
+    def __sub__(self, b: "Int") -> "Int":
+        
+        a = self
+        result_digits = []
+        borrow = 0
 
-                result.append(digit_sum)
+        if a < b:
+            tem = a
+            a = b
+            b = tem
 
-            result.reverse()
-            list_a.reverse()
-            list_b.reverse()
-            self._ans._a = result
-            self._ans._positive = self._a._positive if abs_a > abs_b else self._b._positive
+        pa = len(a) - 1
+        pb = len(b) - 1
+
+        while pa >= 0 or pb >= 0:
+            va = 0
+            if pa >= 0:
+                va = a[pa]
+                pa -= 1
+
+            vb = 0
+            if pb >= 0:
+                vb = b[pb]
+                pb -= 1
+
+            diff = va - vb - borrow
+
+            if diff < 0:  
+                diff += 10
+                borrow = 1
+            else:
+                borrow = 0
+
+            result_digits.append(diff)
+
+        self._reverse(result_digits)
+
+        c = Int(0)
+        c._a = result_digits
+        return c
+
