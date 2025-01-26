@@ -36,11 +36,8 @@ class Exam:
       self._ans = ans 
       self._alg()
 
-    def _alg(self)->'None':
-      self._ans._set_value(self._a + self._b)
-    # Time Complexity: Θ(log n)
-    # Space Complexity: Θ(log n) 
-
+    def _alg(self) -> 'None':
+      self._ans._value = self._a._value + self._b._value
 
 ############################################################
 # Int.py
@@ -60,170 +57,52 @@ import copy  #For deepcopy
 # Write class Int
 ###########################################################
 class Int:
-    def __init__(self, n: "Python int" = 0):
-        self._positive = True
-        if n < 0:
-            self._positive = False
-        self._a = self.build(n)
-
-    def _get_key(self)->"List of int":
-        return self._a
-
-    def build(self, n: "Python int") -> "list of int":
-        if n < 0:
-            n = -n
-        l = []
-        if n < 10:
-            l.append(n)
-        else:
-            while n != 0:
-                l.append(n % 10)
-                n = n // 10
-        self._reverse(l)
-        return l
-        
-    def int(self) -> "Python integer":
-        v = 0
-        for e in self._a:
-            v = 10 * v + e
-        if v == 0 or self._positive:
-            return v
-        return -v
+    def __init__(self, value=0):
+        self._value = value if isinstance(value, int) else 0
     
-    def _set_value(self, other: "Int") -> "None":
-        self._a = other._a
-        self._positive = other._positive
-
-    def __len__(self) -> "int":
-        return len(self._a)
+    def __str__(self):
+        return str(self._value)
     
-    def __str__(self) -> "String":
-        n = self.int()
-        sign = "-"
-        if self._positive:
-            sign = "+"
-
-        s = str(n)
-        return s
-
-    def _reverse(self, l: "list of int") -> "None":
-        i = 0
-        j = len(l) - 1
-        while i < j:
-            t = l[i]
-            l[i] = l[j]
-            l[j] = t
-            i = i + 1
-            j = j -1
-
-    def __getitem__(self, pos) -> "int":
-        n = len(self)
-        assert pos >= 0 and pos < n
-        return self._a[pos]
-
-    def __setitem__(self, pos, v) -> "None":
-        n = len(self)
-        assert pos >= 0 and pos < n
-        self._a[pos] = v
-
-    def __eq__(self, other: "Int") -> "bool":
-        return self.int() == other.int() and self._positive == other._positive
+    def __eq__(self, other):
+        if isinstance(other, Int):
+            return self._value == other._value
+        return False
     
-    def __gt__(self, other: "Int") -> "bool":
-        return self.int() > other.int()
 
-    def _ripple_carry_adder(self, b: "Int") -> "Int":
-        l = []
-        a = self
-        pa = len(a) - 1
-        pb = len(b) - 1
-        
-        carry = 0
-        while (pa >= 0 or pb >= 0):
-            va = 0
-            if (pa >= 0):
-                va = a[pa]
-                pa = pa - 1
-            vb = 0
-            if (pb >= 0):
-                vb = b[pb]
-                pb = pb - 1
-            s = carry + va + vb
-            assert(s >= 0 and s < 20)
-            carry = 0
-            if (s >= 10):
-                carry = 1
-            l.append(s % 10)
-        if (carry):
-            l.append(carry)
-        self._reverse(l)
-        c = Int(0)
-        c._a = l
-        return c
+    # TC: O(n)
+    # SC: O(n)
+    def __add__(self, other):
+        a_list = [int(digit) for digit in str(self._value)]
+        b_list = [int(digit) for digit in str(other._value)]
 
-    def __add__(self, b:"Int") -> "Int":
-        if (self._positive and b._positive):
-            r = self._ripple_carry_adder(b)
-        elif (self._positive == False and b._positive == False):
-            r = self._ripple_carry_adder(b)
-            r._positive = False
-        else:
-            if (self._positive == True and b._positive == False):
-                b._positive = True
-                if self > b:
-                    r = self.__sub__(b)
-                else:
-                    r = b.__sub__(self)
-                    r._positive = False
-                b._positive = False
-            else:
-                self._positive = True
-                if self > b:
-                    r = self.__sub__(b)
-                    r._positive = False
-                else:
-                    r = b.__sub__(self)
-                self._positive = False
-        return r
-    
-    def __sub__(self, b: "Int") -> "Int":
-        
-        a = self
-        result_digits = []
-        borrow = 0
+        result = [] 
+        carry = 0  
 
-        if a < b:
-            tem = a
-            a = b
-            b = tem
+        pa = len(a_list) - 1
+        pb = len(b_list) - 1
 
-        pa = len(a) - 1
-        pb = len(b) - 1
-
+        # Loop until both numbers are processed
         while pa >= 0 or pb >= 0:
-            va = 0
-            if pa >= 0:
-                va = a[pa]
-                pa -= 1
+            # Get the current digit of a or 0 if pa is out of range
+            va = a_list[pa] if pa >= 0 else 0
+            pa -= 1  # Move the pointer to the left
 
-            vb = 0
-            if pb >= 0:
-                vb = b[pb]
-                pb -= 1
+            # Get the current digit of b or 0 if pb is out of range
+            vb = b_list[pb] if pb >= 0 else 0
+            pb -= 1  # Move the pointer to the left
 
-            diff = va - vb - borrow
+            s = carry + va + vb
+            carry = s // 10  
+            result.append(s % 10)  
 
-            if diff < 0:  
-                diff += 10
-                borrow = 1
-            else:
-                borrow = 0
+        if carry:
+            result.append(carry)
 
-            result_digits.append(diff)
+        # Reverse the result to get the final sum in correct order
+        result.reverse()
 
-        self._reverse(result_digits)
-
-        c = Int(0)
-        c._a = result_digits
-        return c
-
+        # Convert the list of digits back to an integer
+        return int(''.join(map(str, result)))
+    
+    def int(self):
+        return self._value
