@@ -8,19 +8,13 @@ class Solution:
         if head is None or head.next is None:
             return head
 
-        dummy = prev = ListNode(0)
-        prev.next = head
+        first = head
+        second = head.next
+        others = head.next.next
 
-        while prev.next and prev.next.next:
-            a = prev.next
-            b = prev.next.next
-            c = prev.next.next.next
-            
-            prev.next = b
-            prev.next.next = a
-            prev.next.next.next = c
-            prev = prev.next.next
-        
-        return dummy.next
+        second.next = first
+        first.next = self.swapPairs(others)
+
+        return second
             
 
