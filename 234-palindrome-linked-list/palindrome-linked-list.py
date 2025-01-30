@@ -5,13 +5,19 @@
 #         self.next = next
 class Solution:
     def reserveList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if head is None or head.next is None:
+            return head
+            
         pre = None
         cur = head
+        nxt = head.next
+
         while cur:
-            temp = cur.next
             cur.next = pre
             pre = cur
-            cur = temp
+            cur = nxt
+            if nxt:
+                nxt = nxt.next
         return pre
 
     def isPalindrome(self, head: Optional[ListNode]) -> bool:
@@ -37,7 +43,8 @@ class Solution:
             else:
                 return False
         return True
-    
+        
+
 
         
      
