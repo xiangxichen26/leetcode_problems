@@ -8,10 +8,10 @@ class Solution:
         pre = None
         cur = head
         while cur:
-            next = cur.next
+            temp = cur.next
             cur.next = pre
             pre = cur
-            cur = next
+            cur = temp
         return pre
 
     def isPalindrome(self, head: Optional[ListNode]) -> bool:
