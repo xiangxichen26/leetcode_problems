@@ -4,51 +4,36 @@
 #         self.val = val
 #         self.next = next
 class Solution:
-    def findNthEnd(self, head, n) ->  Optional[ListNode]:
-        if not head:
-            return None
-        
-        slow = head
-        fast = head
-
-        for _ in range(n):
-            fast = fast.next
-        
-        while fast:
-            slow = slow.next
-            fast = fast.next
-        return slow
+    def length(self, node: Optional[ListNode]) -> int:
+        n = 0
+        while node:
+            node = node.next
+            n += 1
+        return n
 
     def rotateRight(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
-        if not head or k==0 :
+        if not head:
             return head
-        
-        p = head
-        l = 0
-        last = head
-        while p:
-            l += 1
-            p = p.next
-        
-        n = k % l
-        
-        if n==0:
+
+        n = self.length(head)
+        if k % n == 0:
             return head
-        
-        # 获取倒数N-1个结点
-        a = self.findNthEnd(head, n+1)
-        
-        # 获取倒数N个结点
-        new_head = self.findNthEnd(head, n)
 
-        # 获取最后一个结点
-        last = self.findNthEnd(head, 1)
+        k = k % n
 
-        last.next = head
-        head = new_head
-        a.next = None
+        node = head
+        for _ in range(n - k - 1):
+            node = node.next
 
-        return head
+        res = node.next
+        node.next = None
+
+        tail = res
+        while tail.next:
+            tail = tail.next
+
+        tail.next = head
+        return res
 
 
 
