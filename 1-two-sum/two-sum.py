@@ -1,9 +1,12 @@
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
-        records = dict()
+        val_to_index = {}
 
-        for index, value in enumerate(nums):  
-            if target - value in records:  
-                return [records[target- value], index]
-            records[value] = index  
+        for i in range(len(nums)):
+            need = target - nums[i]
+            if need in val_to_index:
+                return [val_to_index[need], i]
+            
+            val_to_index[nums[i]] = i
+        
         return []
