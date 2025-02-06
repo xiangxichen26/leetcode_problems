@@ -21,17 +21,12 @@ class Solution:
                 list2 = temp  
             p = p.next
         
-        while list1:
+        if list1:
             p.next = list1
-            p = p.next
-            list1 = list1.next
         
-        while list2:
+        if list2:
             p.next = list2
-            p = p.next
-            list2 = list2.next
         
-        p.next = None
         return dummy.next
 
 
