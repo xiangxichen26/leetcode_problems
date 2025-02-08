@@ -6,7 +6,9 @@ class Solution:
         for row in range(m):
             for col in range(n):
                 origin_index = row * n + col
-                new_index = (origin_index + k) % (m*n)
+                new_index = (origin_index + k)
+                if new_index >= m*n:
+                    new_index %= (m*n)
                 i = new_index // n
                 j = new_index % n
                 res[i][j] = grid[row][col]
