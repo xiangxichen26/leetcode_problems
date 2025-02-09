@@ -8,8 +8,8 @@ class Solution:
 
         for i, num in enumerate(nums):
             preSum += num
-            need = preSum % k
-
+            # (preSum - need) % k == 0
+            need = (preSum-k) % k
             if need in preSum_to_index:
                 length = i - preSum_to_index[need]
                 if length >= 2:
