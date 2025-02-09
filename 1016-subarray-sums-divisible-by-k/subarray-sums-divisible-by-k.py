@@ -12,10 +12,6 @@ class Solution:
             if need in mod_to_index:
                 count += mod_to_index[need]
             
-            if preSum % k not in mod_to_index:
-                mod_to_index[preSum % k] = 1
-            else:
-                mod_to_index[preSum % k] += 1
-        
+            mod_to_index[preSum % k] = mod_to_index.get(preSum % k,0) + 1
         return count
         
