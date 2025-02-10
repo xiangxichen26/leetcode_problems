@@ -10,7 +10,7 @@ class Solution:
             right += 1
 
             while left < right and len(freqs) > k:
-                freqs[s[left]] = freqs.get(s[left],0) - 1
+                freqs[s[left]] -=  1
                 if freqs[s[left]] == 0:
                     del freqs[s[left]]
                 left += 1
