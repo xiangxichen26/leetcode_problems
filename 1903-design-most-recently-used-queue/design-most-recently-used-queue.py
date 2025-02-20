@@ -1,20 +1,14 @@
 class MRUQueue:
 
     def __init__(self, n: int):
-        self.size = 0
-        self.mRUQueue = []
-        for i in range(1,n+1):
-            self.mRUQueue.append(i)
-            self.size += 1
+        self.mRUQueue = [i for i in range(1, n + 1)]
 
     def fetch(self, k: int) -> int:
-        if k > self.size or k < 1:
-            return
-        
-        x = self.mRUQueue[k-1]
-        self.mRUQueue[k-1: self.size-1] = self.mRUQueue[k:]
-        self.mRUQueue[self.size-1] = x
-        return x
+        # Get the k-th element (1-indexed)
+        value = self.mRUQueue.pop(k - 1)
+        # Append the element to the end of the queue
+        self.mRUQueue.append(value)
+        return value
 
 
 # Your MRUQueue object will be instantiated and called as such:
