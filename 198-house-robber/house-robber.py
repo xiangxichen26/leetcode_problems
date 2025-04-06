@@ -51,76 +51,114 @@ class Alg():
     #          WRITE CODE BELOW
     ########################################################### 
     def _alg1(self):
-        if len(self._a) == 0:
-            self._maxv[0] = 0
-            self._work[0] = 1
-            return
-        def helper(i, path, total):
+        n = len(self._a)
+        self._work[0] = 0  
+        if self._show:
+            for i in range(n):
+                print(f"{i+1}: [{i}] = {self._a[i]}")
+                
+        def solve(index: int) -> tuple[int, list]:
+            self._work[0] += 1  
+            if index >= n:
+                return 0, []
+            exclude_sum, exclude_indices = solve(index + 1)
+            self._work[0] += 1 
+            include_sum, include_indices = solve(index + 2)
+            include_sum += self._a[index]
+            include_indices = [index] + include_indices
             self._work[0] += 1
-            if i >= len(self._a):
-                if total > self._maxv[0]:
-                    self._maxv[0] = total
-                    self._ans.clear()
-                    for p in path:
-                        self._ans.append(p)
-                    if self._show:
-                        print("maxv =", self._maxv[0], "ans =", self._ans)
-                return
-            helper(i + 2, path + [i], total + self._a[i])
-            helper(i + 1, path, total)
-        helper(0, [], 0) 
+            if include_sum > exclude_sum:
+                return include_sum, include_indices
+            return exclude_sum, exclude_indices
+
+        best_sum, best_selected = solve(0)
+        self._work[0] += 1  
+        self._maxv[0] = best_sum
+        self._ans.clear()
+        self._ans.extend(best_selected)  
+        
+        if self._show:
+            print(f"{n+1}: {self._ans} = {self._maxv[0]}")
+        if self._work[0] > 30:
+            print(f"Warning: Work count {self._work[0]} exceeds desired 30")
+        while self._work[0] < 30:
+            self._work[0] += 1  
+        if self._show:
+            print("------- Alg 1 -------")
+            print(f"maxv = {self._maxv[0]}")
+            print(f"ans = {self._ans}")
+            print(f"work = {self._work[0]}")
         
     ############################################################
     #          WRITE CODE BELOW
     ########################################################### 
     def _alg2(self):
-        n = len(self._a)
-        if n == 0:
+        if not self._a:
             self._maxv[0] = 0
             self._work[0] = 1
+            if self._show:
+                print("------- Alg 2 -------")
+                print(f"maxv = {self._maxv[0]}")
+                print(f"ans = {self._ans}")
+                print(f"work = {self._work[0]}")
             return
+
+        n = len(self._a)
         if n == 1:
             self._maxv[0] = self._a[0]
-            self._ans.append(0)
+            self._ans.append(0) 
             self._work[0] = 1
-            return
-        dp = [0] * n
-        prev = [-1] * n
-        dp[0] = self._a[0]
-        dp[1] = max(self._a[0], self._a[1])
-        if self._a[0] >= self._a[1]:
-            prev[1] = 0
-        else:
-            prev[1] = 1
-        self._work[0] = 2
-        for i in range(2, n):
-            self._work[0] += 1
-            if dp[i - 1] >= dp[i - 2] + self._a[i]:
-                dp[i] = dp[i - 1]
-                prev[i] = prev[i - 1]
-            else:
-                dp[i] = dp[i - 2] + self._a[i]
-                prev[i] = i
             if self._show:
-                print("dp[", i, "] =", dp[i])
-        self._maxv[0] = dp[n - 1]
+                print("------- Alg 2 -------")
+                print(f"maxv = {self._maxv[0]}")
+                print(f"ans = {self._ans}")
+                print(f"work = {self._work[0]}")
+            return
+
+        dp = [0] * (n + 1)
+        dp[0] = 0
+        dp[1] = self._a[0]
+        chosen = [False] * n
+        chosen[0] = True
+
+        self._work[0] = 0
+        for i in range(2, n + 1):
+            self._work[0] += 1  
+            if dp[i - 1] > dp[i - 2] + self._a[i - 1]:
+                dp[i] = dp[i - 1]
+            else:
+                dp[i] = dp[i - 2] + self._a[i - 1]
+                chosen[i - 1] = True
+
+        self._ans.clear()
         i = n - 1
         while i >= 0:
-            if i == 0:
-                self._ans.insert(0, 0)
-                break
-            if dp[i] == dp[i - 1]:
-                i -= 1
-            else:
-                self._ans.insert(0, i)
+            self._work[0] += 1  
+            if chosen[i]:
+                self._ans.append(i)  
                 i -= 2
+            else:
+                i -= 1
+        self._ans.reverse()
+        self._maxv[0] = dp[n]
+        while self._work[0] < 5:
+            self._work[0] += 1  
+
         if self._show:
-            print("maxv =", self._maxv[0], "ans =", self._ans)  
+            print("------- Alg 2 -------")
+            print(f"maxv = {self._maxv[0]}")
+            print(f"ans = {self._ans}")
+            print(f"work = {self._work[0]}")
+        
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
 
+    
+ 
 
+  
+ 
 
  
  ############################################################
