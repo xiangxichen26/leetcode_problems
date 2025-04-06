@@ -51,82 +51,74 @@ class Alg():
     #          WRITE CODE BELOW
     ########################################################### 
     def _alg1(self):
-        def helper(i, selected, total):
+        if len(self._a) == 0:
+            self._maxv[0] = 0
+            self._work[0] = 1
+            return
+        def helper(i, path, total):
             self._work[0] += 1
-            if self._show:
-                print(f"Brute step {self._work[0]}: i={i}, selected={selected}, total={total}")
             if i >= len(self._a):
-                return (total, selected[:])
-            # Option 1: take current
-            take_total, take_sel = helper(i + 2, selected + [i], total + self._a[i])
-            # Option 2: skip current
-            skip_total, skip_sel = helper(i + 1, selected, total)
-            if take_total > skip_total:
-                return (take_total, take_sel)
-            else:
-                return (skip_total, skip_sel)
-    
-        maxval, result = helper(0, [], 0)
-        self._maxv[0] = maxval
-        self._ans.extend(result)
-        if self._show:
-            print("Brute Force Result:")
-            print("Max Value:", maxval)
-            print("Selected Indices:", result)
+                if total > self._maxv[0]:
+                    self._maxv[0] = total
+                    self._ans.clear()
+                    for p in path:
+                        self._ans.append(p)
+                    if self._show:
+                        print("maxv =", self._maxv[0], "ans =", self._ans)
+                return
+            helper(i + 2, path + [i], total + self._a[i])
+            helper(i + 1, path, total)
+        helper(0, [], 0) 
+        
     ############################################################
     #          WRITE CODE BELOW
+    ########################################################### 
     def _alg2(self):
         n = len(self._a)
         if n == 0:
             self._maxv[0] = 0
+            self._work[0] = 1
             return
-    
+        if n == 1:
+            self._maxv[0] = self._a[0]
+            self._ans.append(0)
+            self._work[0] = 1
+            return
         dp = [0] * n
-        pick = [[] for _ in range(n)]
-    
+        prev = [-1] * n
         dp[0] = self._a[0]
-        pick[0] = [0]
-        self._work[0] += 1
-        if self._show:
-            print(f"DP step {self._work[0]}: dp[0]={dp[0]}, pick[0]={pick[0]}")
-    
-        if n >= 2:
-            self._work[0] += 1
-            if self._a[1] > self._a[0]:
-                dp[1] = self._a[1]
-                pick[1] = [1]
-            else:
-                dp[1] = self._a[0]
-                pick[1] = [0]
-            if self._show:
-                print(f"DP step {self._work[0]}: dp[1]={dp[1]}, pick[1]={pick[1]}")
-    
+        dp[1] = max(self._a[0], self._a[1])
+        if self._a[0] >= self._a[1]:
+            prev[1] = 0
+        else:
+            prev[1] = 1
+        self._work[0] = 2
         for i in range(2, n):
             self._work[0] += 1
-            if dp[i - 1] > dp[i - 2] + self._a[i]:
+            if dp[i - 1] >= dp[i - 2] + self._a[i]:
                 dp[i] = dp[i - 1]
-                pick[i] = pick[i - 1][:]
+                prev[i] = prev[i - 1]
             else:
                 dp[i] = dp[i - 2] + self._a[i]
-                pick[i] = pick[i - 2] + [i]
+                prev[i] = i
             if self._show:
-                print(f"DP step {self._work[0]}: dp[{i}]={dp[i]}, pick[{i}]={pick[i]}")
-    
-        self._maxv[0] = dp[-1]
-        self._ans.extend(pick[-1])
+                print("dp[", i, "] =", dp[i])
+        self._maxv[0] = dp[n - 1]
+        i = n - 1
+        while i >= 0:
+            if i == 0:
+                self._ans.insert(0, 0)
+                break
+            if dp[i] == dp[i - 1]:
+                i -= 1
+            else:
+                self._ans.insert(0, i)
+                i -= 2
         if self._show:
-            print("DP Result:")
-            print("Max Value:", self._maxv[0])
-            print("Selected Indices:", self._ans)
-
-  
+            print("maxv =", self._maxv[0], "ans =", self._ans)  
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
-
-
-
-
 
 
 
