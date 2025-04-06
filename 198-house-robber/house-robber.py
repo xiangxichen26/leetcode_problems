@@ -51,75 +51,86 @@ class Alg():
     #          WRITE CODE BELOW
     ########################################################### 
     def _alg1(self):
-        best_num = [0]
-        best_choice = [[]]
-        self._work[0] = 0
-
-        def rec(i,cur_num,idx):
+        def helper(i, selected, total):
             self._work[0] += 1
             if self._show:
-                print("Brute force step: i =",i,"cur_num =",cur_num,"idx =",idx)
-            if i>=len(self._a):
-                if cur_num>best_num[0]:
-                    best_num[0] = cur_num
-                    best_choice[0] = idx.copy()
-                return
-            rec(i+1,cur_num,idx)
-            rec(i+2,cur_num+self._a[i],idx+[i])
-         
-        rec(0,0,[])
-        self._maxv[0] = best_num[0]
-        self._ans.extend(best_choice[0])
-
+                print(f"Brute step {self._work[0]}: i={i}, selected={selected}, total={total}")
+            if i >= len(self._a):
+                return (total, selected[:])
+            # Option 1: take current
+            take_total, take_sel = helper(i + 2, selected + [i], total + self._a[i])
+            # Option 2: skip current
+            skip_total, skip_sel = helper(i + 1, selected, total)
+            if take_total > skip_total:
+                return (take_total, take_sel)
+            else:
+                return (skip_total, skip_sel)
+    
+        maxval, result = helper(0, [], 0)
+        self._maxv[0] = maxval
+        self._ans.extend(result)
+        if self._show:
+            print("Brute Force Result:")
+            print("Max Value:", maxval)
+            print("Selected Indices:", result)
     ############################################################
     #          WRITE CODE BELOW
-    ########################################################### 
     def _alg2(self):
-        self._work[0] = 0
-        n=len(self._a)
-        if n==0:
+        n = len(self._a)
+        if n == 0:
             self._maxv[0] = 0
-            self._ans.clear()
             return
-        dp=[0]*n
-        dp[0]=self._a[0]
-        self._work[0]+=1
+    
+        dp = [0] * n
+        pick = [[] for _ in range(n)]
+    
+        dp[0] = self._a[0]
+        pick[0] = [0]
+        self._work[0] += 1
         if self._show:
-            print("DP step: i =",0,"dp[0] =",dp[0])
-        if n==1:
-            self._maxv[0] = dp[0]
-            self._ans.clear()
-            self._ans.append(0)
-            return
-        dp[1]=max(self._a[0],self._a[1])
-        self._work[0]+=1
-        if self._show:
-            print("DP step: i =",1,"dp[1] =",dp[1])
-        for i in range(2,n):
-            self._work[0]+=1
-            dp[i]=max(dp[i-1],dp[i-2]+self._a[i])
-            if self._show:
-                print("DP step: i =",i,"dp[i] =",dp[i])
-        self._maxv[0] = dp[n-1]
-
-        result = []
-        i=n-1
-        while i>=0:
-            if i==0:
-                result.append(0)
-                break
-            if i==1:
-                result.append(1) if self._a[1]>=self._a[0] else result.append(0)
-                break
-            if dp[i-1]>=dp[i-2]+self._a[i]:
-                i-=1
+            print(f"DP step {self._work[0]}: dp[0]={dp[0]}, pick[0]={pick[0]}")
+    
+        if n >= 2:
+            self._work[0] += 1
+            if self._a[1] > self._a[0]:
+                dp[1] = self._a[1]
+                pick[1] = [1]
             else:
-                result.append(i)
-                i-=2
-        result.reverse()
-        self._ans.clear()
-        self._ans.extend(result)
+                dp[1] = self._a[0]
+                pick[1] = [0]
+            if self._show:
+                print(f"DP step {self._work[0]}: dp[1]={dp[1]}, pick[1]={pick[1]}")
+    
+        for i in range(2, n):
+            self._work[0] += 1
+            if dp[i - 1] > dp[i - 2] + self._a[i]:
+                dp[i] = dp[i - 1]
+                pick[i] = pick[i - 1][:]
+            else:
+                dp[i] = dp[i - 2] + self._a[i]
+                pick[i] = pick[i - 2] + [i]
+            if self._show:
+                print(f"DP step {self._work[0]}: dp[{i}]={dp[i]}, pick[{i}]={pick[i]}")
+    
+        self._maxv[0] = dp[-1]
+        self._ans.extend(pick[-1])
+        if self._show:
+            print("DP Result:")
+            print("Max Value:", self._maxv[0])
+            print("Selected Indices:", self._ans)
 
+  
+ ############################################################
+#  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
+###########################################################  
+
+
+
+
+
+
+
+ 
  ############################################################
 #  AFTER EXAM DELETE CODE BELOW AND ADD GIVEN CODE
 ###########################################################  
