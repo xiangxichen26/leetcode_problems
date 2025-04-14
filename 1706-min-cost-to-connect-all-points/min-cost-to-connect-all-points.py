@@ -60,169 +60,197 @@ class Solution:
 # Graph Exam
 ###########################################################
 class GraphExam:
-  def __init__(
+    def __init__(
         self,
-        n:"num verices",
+        n: "num vertices",
         g: "graph",
         graph_name: "string",
         a: "python list of tuples (from, to, weight)",
-        min_sum:'list of size 1', #Must compute always
-        min_prod:'list of size 1', #compute only if all weights > 0 and n <= LIMIT
-        ws:'List of all path weights used for computing min MST sum',
-        wp:'List of all path weights used for computing min MST product',
-        show:'bool' #Must show SUM graph if show = true
+        min_sum: 'list of size 1',  # Must compute always
+        min_prod: 'list of size 1',  # Compute only if all weights > 0 and n <= LIMIT
+        ws: 'List of all path weights used for computing min MST sum',
+        wp: 'List of all path weights used for computing min MST product',
+        show: 'bool'  # Must show SUM graph if show == True
     ):
-    ## NOTHING CAN BE CHANGED BELOW
-    self._n = n 
-    self._g = g
-    self._graph_name = graph_name
-    self._a = a #python list of tuples (from, to, weight)
-    self._min_sum = min_sum
-    self._min_prod = min_prod
-    self._ws = ws #path used for min sum weight 
-    self._wp = wp #path used for min prod weight 
-    self._show = show
-    #DO NOT BUILD GRAPH or COMPUTE PRODUCT if self._n > self._MAX
-    self._MAX = 100
-   
-    if (self._n <= self._MAX):
-        self._build_graph(a)    
-    else:
-        self._show = False
-        
-    if (self._show):
-      input_graph_file = outputFileBase + self._graph_name + ".dot"
-      self._g.write_dot(input_graph_file) #You already have this routine
-      print("graph is at:",input_graph_file)
-        
-    output_graph_file = outputFileBase + self._graph_name + "out.dot"
-    if (self._n <= self._MAX):
-        #you have the graph. Get all edges from the graph
-        edges = self._build_edge_data_struture_from_graph()
-    else:
-        #You never built the graph
-        edges = self._a
-       
-    #Compute min_sum always
-    #compute min_product only if n <= LIMIT and w > 0
-    #Must output graph as a dot file if only show=True
-    self._compute_min_sum_min_prod(edges,output_graph_file)
- 
-    
-  def _build_graph(self, a:"python list of tuples (from, to, weight)"):
-    all_nodes = set()
-    for (u,v,w) in a:
-      all_nodes.add(u)
-      all_nodes.add(v)
-     
-    for node in all_nodes:
-      d = Data(str(node))
-      self._g._data_interface.insert(d)
-      
-    for (u,v,w) in a:
-       self._g.add_edge(u,v,w)
+        ## NOTHING CAN BE CHANGED BELOW
+        self._n = n
+        self._g = g
+        self._graph_name = graph_name
+        self._a = a  # Python list of tuples (from, to, weight)
+        self._min_sum = min_sum
+        self._min_prod = min_prod
+        self._ws = ws  # Path used for MST sum weights
+        self._wp = wp  # Path used for MST product weights
+        self._show = show
+        # DO NOT BUILD GRAPH or COMPUTE PRODUCT if self._n > self._MAX
+        self._MAX = 100
 
-  def _compute_min_sum_min_prod(self,edges:"python list of tuples (from, to, weight)", out_file:'string'):
-    # if show is True, you must write dot file of output
-    # DO NOT COMPUTE PRODUCT if self._n > self._MAX
-    # DO NOT COMPUTE PRODUCT if weight <= 0
-    # Test bench will fail if you dont follow
-    compute_prod=True
-    if self._n > self._MAX:
-      compute_prod = False  
-    for (_,_,w) in edges:
-      if w <= 0:
-        compute_prod = False
-        break
-    
-    all_vertices=set([u for (u,_,_) in edges]+[v for (_,v,_) in edges])
-    parent = {v:v for v in all_vertices}
-    rank = {v:0 for v in all_vertices}
-    def find(x):
-      if parent[x] != x:
-        parent[x] = find(parent[x])
-      return parent[x]
-    def union(x,y):
-      rx = find(x)
-      ry = find(y)
-      if rx == ry:
-        return False
-      if rank[rx] < rank[ry]:
-        parent[rx] = ry
-      elif rank[rx] > rank[ry]:
-        parent[ry] = rx
-      else:
-        parent[ry] = rx
-        rank[rx] += 1
-      return True
-    
-    edges_sorted = sorted(edges, key=lambda e: e[2])
-    self._ws.clear()
-    total_sum = 0
-    mst_edges_sum=[]
-    for (u,v,w) in edges_sorted:
-      if union(u,v):
-        total_sum += w
-        self._ws.append(w)
-        mst_edges_sum.append((u,v,w))
-      if len(mst_edges_sum) == len(all_vertices) - 1:
-        break
-    self._min_sum[0] = total_sum
-
-    self._wp.clear()
-    if compute_prod:
-      parent = {v:v for v in all_vertices}
-      rank = {v:0 for v in all_vertices}
-      edges_by_log=sorted(edges, key=lambda e: math.log(e[2]))
-      total_prod = 1
-      mst_edges_prod=[]
-      for (u,v,w) in edges_by_log:
-        if union(u,v):
-          total_prod *= w
-          self._wp.append(w)
-          mst_edges_prod.append((u,v,w))
-        if len(mst_edges_prod) == len(all_vertices) - 1:
-          break
-      self._min_prod[0] = total_prod
-    else:
-      self._min_prod[0] = -1
-
-    if (self._show):
-      out_graph=Graph(self._g.get_graph_type())
-      for u, v, _ in mst_edges_sum:
-        d_u = Data(str(u))
-        d_v = Data(str(v))
-        out_graph._data_interface.insert(d_u)
-        out_graph._data_interface.insert(d_v)
-      for u, v, w in mst_edges_sum:
-        out_graph.add_edge(u, v, w)
-      out_graph.write_dot(out_file)
-
-      for (u,v,w) in edges:
-        print(f"{u} {v}{w}")
-      
-      print(f"min_sum={self._min_sum[0]}")
-      print(f"min_prod={self._min_prod[0]}")
-      ws_str = ",".join(str(w) for w in self._ws)
-      wp_str = ",".join(str(w) for w in self._wp)
-      print(f"ws=[{ws_str}]")
-      print(f"wp=[{wp_str}]")
-      
-  def _build_edge_data_struture_from_graph(self)->"python list (from, to, weight)":
-    edges = []
-    for node in self._g.list_of_nodes():
-      n = node.get_num()
-      for edge in node.all_fanout_edges_of_a_node():
-        v = edge.get_num()
-        w = edge.get_weight()
-        if self._g.is_undirected_graph():
-           if n < v:
-             edges.append((n,v,w))
+        if (self._n <= self._MAX):
+            self._build_graph(a)
         else:
-           edges.append((n,v,w))
-    return edges
- 
+            self._show = False
 
+        if (self._show):
+            input_graph_file = outputFileBase + self._graph_name + ".dot"
+            self._g.write_dot(input_graph_file)  # You already have this routine
+            print("graph is at:", input_graph_file)
+
+        output_graph_file = outputFileBase + self._graph_name + "out.dot"
+        if (self._n <= self._MAX):
+            # You have the graph. Get all edges from the graph.
+            edges = self._build_edge_data_struture_from_graph()
+        else:
+            # You never built the graph.
+            edges = self._a
+
+        # Compute min_sum always.
+        # Compute min_product only if n <= LIMIT and all weights > 0.
+        # Must output graph as a dot file if show == True.
+        self._compute_min_sum_min_prod(edges, output_graph_file)
+
+    def _build_graph(self, a:"python list of tuples (from, to, weight)"):
+        nodes = set()
+        for (f, t, w) in a:
+            nodes.add(f)
+            nodes.add(t)
+        for i in nodes:
+            if self._g._data_interface.find_by_name(str(i)) == -1:
+                self._g._data_interface.insert(Data(str(i)))
+        for (f, t, w) in a:
+            self._g.add_edge(f, t, w)
+
+    def _compute_min_sum_min_prod(self, edges: "python list of tuples (from, to, weight)", out_file: 'string'):
+        # Helper functions for the Union-Find (Disjoint Set) structure.
+        def find(parent, x):
+            if parent[x] != x:
+                parent[x] = find(parent, parent[x])
+            return parent[x]
+
+        def union(parent, rank, x, y):
+            rx = find(parent, x)
+            ry = find(parent, y)
+            if rx != ry:
+                if rank[rx] < rank[ry]:
+                    parent[rx] = ry
+                elif rank[rx] > rank[ry]:
+                    parent[ry] = rx
+                else:
+                    parent[ry] = rx
+                    rank[rx] += 1
+                return True
+            return False
+
+        # Function to build MST using Kruskal's algorithm; returns the MST edges.
+        def build_mst_sum(n, edgelist):
+            edgelist_sorted = sorted(edgelist, key=lambda x: x[2])
+            parent = [i for i in range(n)]
+            rank = [0] * n
+            mst_edges = []
+            count = 0
+            for (f, t, w) in edgelist_sorted:
+                if union(parent, rank, f, t):
+                    mst_edges.append((f, t, w))
+                    count += 1
+                    if count == n - 1:
+                        break
+            return mst_edges
+
+        # 1) Compute the MST sum.
+        mst_sum_edges = build_mst_sum(self._n, edges)
+        self._ws.clear()  # Clear the list that stores MST weights.
+        sum_val = 0
+        for (f, t, w) in mst_sum_edges:
+            sum_val += w
+            self._ws.append(w)
+        self._min_sum[0] = sum_val
+
+        # 2) Compute the MST product only if all weights are positive and n <= _MAX.
+        can_compute_product = True
+        if self._n > self._MAX:
+            can_compute_product = False
+        else:
+            for (f, t, w) in edges:
+                if w <= 0:
+                    can_compute_product = False
+                    break
+
+        if can_compute_product:
+            mst_prod_edges = build_mst_sum(self._n, edges)
+            self._wp.clear()
+            prod_val = 1
+            for (f, t, w) in mst_prod_edges:
+                prod_val *= w
+                self._wp.append(w)
+            self._min_prod[0] = prod_val
+        else:
+            self._min_prod[0] = -1
+
+        # 3) If self._show is True, output the MST (sum) graph to out_file.
+        if self._show:
+            # Retain only the MST edges in the graph.
+            is_undirected = self._g.is_undirected_graph()
+            mst_set = set()
+            for (f, t, w) in mst_sum_edges:
+                if is_undirected:
+                    if f < t:
+                        mst_set.add((f, t))
+                    else:
+                        mst_set.add((t, f))
+                else:
+                    mst_set.add((f, t))
+
+            # Clean up the graph: remove edges not used in the MST from fanouts and fanins.
+            all_nodes = self._g.list_of_nodes()
+            for node in all_nodes:
+                n = node.get_num()
+                # Process fanout edges.
+                fanout_edges = list(node.all_fanout_edges_of_a_node())
+                for edge_obj in fanout_edges:
+                    tnode = edge_obj.get_num()
+                    if is_undirected:
+                        pair = (n, tnode) if n < tnode else (tnode, n)
+                        if pair not in mst_set:
+                            node._fanouts.pop(tnode, None)
+                    else:
+                        if (n, tnode) not in mst_set:
+                            node._fanouts.pop(tnode, None)
+                # Process fanin edges.
+                fanin_edges = list(node.all_fanin_edges_of_a_node())
+                for edge_obj in fanin_edges:
+                    tnode = edge_obj.get_num()
+                    if is_undirected:
+                        pair = (tnode, n) if tnode < n else (n, tnode)
+                        if pair not in mst_set:
+                            node._fanins.pop(tnode, None)
+                    else:
+                        if (tnode, n) not in mst_set:
+                            node._fanins.pop(tnode, None)
+
+            # Update the graph's edge count. For undirected graphs, _numE should equal the number of MST edges.
+            self._g._numE = len(mst_sum_edges)
+            self._g.write_dot(out_file)
+            print("Output MST sum graph is at:", out_file)
+
+    def _build_edge_data_struture_from_graph(self) -> "python list (from, to, weight)":
+        # Build and return a list of edges from the graph's nodes.
+        edges_list = []
+        is_undirected = self._g.is_undirected_graph()
+        visited = set()
+        all_nodes = self._g.list_of_nodes()
+        for node in all_nodes:
+            n = node.get_num()
+            fanouts = node.all_fanout_edges_of_a_node()
+            for edge_obj in fanouts:
+                t = edge_obj.get_num()
+                w = edge_obj.get_weight()
+                if is_undirected:
+                    pair = (n, t) if n < t else (t, n)
+                    if pair not in visited:
+                        visited.add(pair)
+                        edges_list.append((n, t, w))
+                else:
+                    edges_list.append((n, t, w))
+        return edges_list
 
 
 ############################################################
