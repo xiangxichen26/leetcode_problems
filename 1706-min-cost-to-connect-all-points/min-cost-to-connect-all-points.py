@@ -93,6 +93,14 @@ class GraphExam:
     if (self._show):
       input_graph_file = outputFileBase + self._graph_name + ".dot"
       self._g.write_dot(input_graph_file) #You already have this routine
+      
+      from graphviz import Source
+      with open(input_graph_file, "r") as f:
+          dot_content = f.read()
+      graph = Source(dot_content)
+      pdf_name = input_graph_file.replace(".dot", "")
+      graph.render(pdf_name, format="pdf", cleanup=True)
+      
       print("graph is at:",input_graph_file)
         
     output_graph_file = outputFileBase + self._graph_name + "out.dot"
@@ -110,102 +118,127 @@ class GraphExam:
  
     
   def _build_graph(self, a:"python list of tuples (from, to, weight)"):
-    for u, v, w in a:
-      self._g.add_edge(u, v, w)
+    
+    for from_node in range(self._n):
+      self._g._data_interface.insert(Data(from_node))
+      
+    for edge in a:
+      from_node, to_node, weight = edge
+      self._g.add_edge(from_node, to_node, weight)
+    
+
+
   def _compute_min_sum_min_prod(self,edges:"python list of tuples (from, to, weight)", out_file:'string'):
     # if show is True, you must write dot file of output
     # DO NOT COMPUTE PRODUCT if self._n > self._MAX
     # DO NOT COMPUTE PRODUCT if weight <= 0
     # Test bench will fail if you dont follow
- # Always compute min_sum
-    parent = {}
-    def find(u):
-      while parent[u] != u:
-        parent[u] = parent[parent[u]]
-        u = parent[u]
-      return u
-
-    def union(u, v):
-      pu = find(u)
-      pv = find(v)
-      parent[pu] = pv
-
-    for u, v, _ in edges:
-      parent[u] = u
-      parent[v] = v
-
+    
+    #MST
     sorted_edges = sorted(edges, key=lambda x: x[2])
-
-    sum_mst = []
-    total_sum = 0
-
-    for u, v, w in sorted_edges:
-      if find(u) != find(v):
-        union(u, v)
-        sum_mst.append((u, v, w))
-        total_sum += w
-
-    self._min_sum[0] = total_sum
-    for e in sum_mst:
-      self._ws.append(e[2])
-
-    can_compute_prod = True
-    for _, _, w in edges:
-      if w <= 0:
-        can_compute_prod = False
-        break
-
-    if (self._n <= self._MAX) and can_compute_prod:
-      parent_prod = {}
-      for u, v, _ in edges:
-        parent_prod[u] = u
-        parent_prod[v] = v
-
-      def find_prod(u):
-        while parent_prod[u] != u:
-          parent_prod[u] = parent_prod[parent_prod[u]]
-          u = parent_prod[u]
-        return u
-
-      def union_prod(u, v):
-        pu = find_prod(u)
-        pv = find_prod(v)
-        parent_prod[pu] = pv
-
-      prod_mst = []
-      prod = 1
-
-      for u, v, w in sorted_edges:
-        if find_prod(u) != find_prod(v):
-          union_prod(u, v)
-          prod_mst.append((u, v, w))
-          prod *= w
-
-      self._min_prod[0] = prod
-      for e in prod_mst:
-        self._wp.append(e[2])
-
+    
+    parent = {}
+    height = {}
+    
+    for i in range(self._n):
+        parent[i] = i
+        height[i] = 0
+        
+    mst_sum_prod_edges = []
+    
+    for edge in sorted_edges:
+        from_node, to_node, weight = edge
+        
+        #hop, always find owner
+        
+        root_from_node = from_node
+        while parent[root_from_node] != root_from_node:
+            parent[root_from_node] = parent[parent[root_from_node]]
+            root_from_node = parent[root_from_node]
+            
+        root_to_node = to_node
+        while parent[root_to_node] != root_to_node:
+            parent[root_to_node] = parent[parent[root_to_node]]
+            root_to_node = parent[root_to_node]
+    
+        #make sure no loop
+        if root_from_node != root_to_node:
+            mst_sum_prod_edges.append(edge)
+            self._ws.append(weight)
+            
+            if self._n <= self._MAX and weight > 0:
+              self._wp.append(weight)
+            
+            #union, cannot union before find
+            if height[root_from_node] < height[root_to_node]:
+                parent[root_from_node] = root_to_node
+            else:
+                parent[root_to_node] = root_from_node
+                
+                if height[root_from_node] == height[root_to_node]:
+                    height[root_from_node] += 1
+                    
+            # n nodes have n-1 edges
+            if len(mst_sum_prod_edges) == self._n - 1:
+                break
+                
+    self._min_sum[0] = sum(self._ws)
+        
+    if self._n <= self._MAX:
+      self._min_prod[0] = 1
+      for weight in self._wp:
+        self._min_prod[0] *= weight
     else:
       self._min_prod[0] = -1
-      self._wp.clear()
+      self._wp = []
+
 
     if self._show:
-      self._g.delete_all_edges()
-      for u, v, w in sum_mst:
-        self._g.add_edge(u, v, w)
-      self._g.write_dot(out_file)
+      
+      mst_graph = Graph(self._g.get_graph_type())
+      
+      for i in range(self._n):
+            mst_graph._data_interface.insert(Data(i))
+            
+      for from_node, to_node, weight in mst_sum_prod_edges:
+            mst_graph.add_edge(from_node, to_node, weight)
+      
+      mst_graph.write_dot(out_file)
+        
+      from graphviz import Source
+
+      with open(out_file, "r") as f:
+          dot_content = f.read()
+            
+      graph = Source(dot_content)
+      pdf_name = out_file.replace(".dot", "")
+      graph.render(pdf_name, format="pdf", cleanup=True)
+
+
 
   def _build_edge_data_struture_from_graph(self)->"python list (from, to, weight)":
+    
+    all_nodes = self._g.list_of_nodes()
     edges = []
-    nodes = self._g.list_of_nodes()
-    for u in nodes:
-      u_num = u.get_num()
-      for edge in u.all_fanout_edges_of_a_node():
-        v_num = edge.get_num()
-        w = edge.get_weight()
-        if u_num < v_num:
-          edges.append((u_num, v_num, w))
+    
+    for node in all_nodes:
+      node_num = node.get_num()  
+      node_name = self._g.get_real_name(node_num)  
+
+      fanout_edges = node.all_fanout_edges_of_a_node()
+
+      for edge in fanout_edges:
+        other_node_num = edge.get_num()  
+        other_node_name = self._g.get_real_name(other_node_num)  
+        weight = edge.get_weight()
+        
+        if node_num < other_node_num:
+          edges.append((node_name, other_node_name, weight))
+        
     return edges
+        
+ 
+
 
 
 ############################################################
