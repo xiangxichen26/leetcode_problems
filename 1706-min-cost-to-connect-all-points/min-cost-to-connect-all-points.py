@@ -110,112 +110,102 @@ class GraphExam:
  
     
   def _build_graph(self, a:"python list of tuples (from, to, weight)"):
-    nodes = set()
-    for edge in a:
-        nodes.add(edge[0])
-        nodes.add(edge[1])
-    for node in nodes:
-        d = Data(str(node))
-        self._g._data_interface.insert(d)
-    for edge in a:
-        from_node = edge[0]
-        to_node = edge[1]
-        weight = edge[2]
-        self._g.add_edge(from_node, to_node, weight)
-
+    for u, v, w in a:
+      self._g.add_edge(u, v, w)
   def _compute_min_sum_min_prod(self,edges:"python list of tuples (from, to, weight)", out_file:'string'):
     # if show is True, you must write dot file of output
     # DO NOT COMPUTE PRODUCT if self._n > self._MAX
     # DO NOT COMPUTE PRODUCT if weight <= 0
     # Test bench will fail if you dont follow
-    sorted_edges_by_sum = sorted(edges, key=lambda x: x[2])
-    parent = list(range(self._n))
-    rank = [0] * self._n
-    def find(x):
-        if parent[x] != x:
-            parent[x] = find(parent[x])
-        return parent[x]
-    def union(x, y):
-        root_x = find(x)
-        root_y = find(y)
-        
-        if root_x == root_y:
-            return
-        if rank[root_x] < rank[root_y]:
-            parent[root_x] = root_y
-        else:
-            parent[root_y] = root_x
-            if rank[root_x] == rank[root_y]:
-                rank[root_x] += 1
-    mst_edges_sum = []
-    min_sum = 0
-    for edge in sorted_edges_by_sum:
-        u, v, w = edge
-        if find(u) != find(v):
-            union(u, v)
-            mst_edges_sum.append(edge)
-            min_sum += w
-            self._ws.append(w)
-    self._min_sum[0] = min_sum
-    compute_product = True
-    if self._n > self._MAX:
-        compute_product = False
-    for edge in edges:
-        if edge[2] <= 0:
-            compute_product = False
-            break
-    if compute_product:
-        import math
-        log_edges = [(e[0], e[1], math.log(e[2])) for e in edges]
-        sorted_edges_by_prod = sorted(log_edges, key=lambda x: x[2])
-        parent = list(range(self._n))
-        rank = [0] * self._n
-        mst_edges_prod = []
-        min_prod = 1
-        for edge in sorted_edges_by_prod:
-            u, v, log_w = edge
-            original_w = next(e[2] for e in edges if e[0] == u and e[1] == v)
-            if find(u) != find(v):
-                union(u, v)
-                mst_edges_prod.append((u, v, original_w))
-                min_prod *= original_w
-                self._wp.append(original_w)
-        self._min_prod[0] = min_prod
-    if (self._show):
-      with open(out_file, 'w') as f:
-          f.write("digraph g {\n")
-          if self._g.is_undirected_graph():
-              f.write("\t edge [dir=none, color=red]\n")
-          else:
-              f.write("\t edge [color=red]\n")
-          for edge in mst_edges_sum:
-              u, v, w = edge
-              u_name = self._g.get_real_name(u)
-              v_name = self._g.get_real_name(v)
-              if self._g.is_weighted_graph():
-                  f.write(f"\t {u_name} -> {v_name} [label = {w}]\n")
-              else:
-                  f.write(f"\t {u_name} -> {v_name}\n")
-          f.write("}")
+ # Always compute min_sum
+    parent = {}
+    def find(u):
+      while parent[u] != u:
+        parent[u] = parent[parent[u]]
+        u = parent[u]
+      return u
+
+    def union(u, v):
+      pu = find(u)
+      pv = find(v)
+      parent[pu] = pv
+
+    for u, v, _ in edges:
+      parent[u] = u
+      parent[v] = v
+
+    sorted_edges = sorted(edges, key=lambda x: x[2])
+
+    sum_mst = []
+    total_sum = 0
+
+    for u, v, w in sorted_edges:
+      if find(u) != find(v):
+        union(u, v)
+        sum_mst.append((u, v, w))
+        total_sum += w
+
+    self._min_sum[0] = total_sum
+    for e in sum_mst:
+      self._ws.append(e[2])
+
+    can_compute_prod = True
+    for _, _, w in edges:
+      if w <= 0:
+        can_compute_prod = False
+        break
+
+    if (self._n <= self._MAX) and can_compute_prod:
+      parent_prod = {}
+      for u, v, _ in edges:
+        parent_prod[u] = u
+        parent_prod[v] = v
+
+      def find_prod(u):
+        while parent_prod[u] != u:
+          parent_prod[u] = parent_prod[parent_prod[u]]
+          u = parent_prod[u]
+        return u
+
+      def union_prod(u, v):
+        pu = find_prod(u)
+        pv = find_prod(v)
+        parent_prod[pu] = pv
+
+      prod_mst = []
+      prod = 1
+
+      for u, v, w in sorted_edges:
+        if find_prod(u) != find_prod(v):
+          union_prod(u, v)
+          prod_mst.append((u, v, w))
+          prod *= w
+
+      self._min_prod[0] = prod
+      for e in prod_mst:
+        self._wp.append(e[2])
+
+    else:
+      self._min_prod[0] = -1
+      self._wp.clear()
+
+    if self._show:
+      self._g.delete_all_edges()
+      for u, v, w in sum_mst:
+        self._g.add_edge(u, v, w)
+      self._g.write_dot(out_file)
 
   def _build_edge_data_struture_from_graph(self)->"python list (from, to, weight)":
     edges = []
-    all_nodes = self._g.list_of_nodes()
-    for node in all_nodes:
-        from_node = node.get_num()
-        fanouts = node.all_fanout_edges_of_a_node()
-        for edge in fanouts:
-            to_node = edge.get_num()
-            weight = edge.get_weight()
-            if self._g.is_undirected_graph():
-                if from_node < to_node:
-                    edges.append((from_node, to_node, weight))
-            else:
-                edges.append((from_node, to_node, weight))
-    
+    nodes = self._g.list_of_nodes()
+    for u in nodes:
+      u_num = u.get_num()
+      for edge in u.all_fanout_edges_of_a_node():
+        v_num = edge.get_num()
+        w = edge.get_weight()
+        if u_num < v_num:
+          edges.append((u_num, v_num, w))
     return edges
- 
-
 
 
 ############################################################
