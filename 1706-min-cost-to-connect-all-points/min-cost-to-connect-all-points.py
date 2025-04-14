@@ -108,173 +108,121 @@ class GraphExam:
     #Must output graph as a dot file if only show=True
     self._compute_min_sum_min_prod(edges,output_graph_file)
  
-  def _build_graph(self, a: "python list of tuples (from, to, weight)"):
-    try:
-        for i in range(self._n):
-            d = Data(str(i))
-            self._g._data_interface.insert(d)
-        
-        for (u, v, w) in a:
-            if not isinstance(u, int) or not isinstance(v, int) or u < 0 or v < 0:
-                print(f"Warning: Invalid node indices ({u},{v}), skipping edge")
-                continue
-            self._g.add_edge(u, v, w)
-        
-        print(f"Graph built with {len(a)} edges")
-    except Exception as e:
-        print(f"Error building graph: {e}")
-        for i in range(self._n):
-            if not self._g._data_interface.find_by_name(str(i)) >= 0:
-                d = Data(str(i))
-                self._g._data_interface.insert(d)
+    
+  def _build_graph(self, a:"python list of tuples (from, to, weight)"):
+    all_nodes = set()
+    for (u,v,w) in a:
+      all_nodes.add(u)
+      all_nodes.add(v)
+     
+    for node in all_nodes:
+      d = Data(str(node))
+      self._g._data_interface.insert(d)
+      
+    for (u,v,w) in a:
+       self._g.add_edge(u,v,w)
 
-  def _compute_min_sum_min_prod(self, edges: "python list of tuples (from, to, weight)", out_file: 'string'):
+  def _compute_min_sum_min_prod(self,edges:"python list of tuples (from, to, weight)", out_file:'string'):
     # if show is True, you must write dot file of output
     # DO NOT COMPUTE PRODUCT if self._n > self._MAX
     # DO NOT COMPUTE PRODUCT if weight <= 0
     # Test bench will fail if you dont follow
-    class UnionFind:
-        def __init__(self, n):
-            self.parent = list(range(n))
-            self.rank = [0] * n
-            self.count = n  
-        
-        def find(self, x):
-            if self.parent[x] != x:
-                self.parent[x] = self.find(self.parent[x]) 
-            return self.parent[x]
-        
-        def union(self, x, y):
-            root_x = self.find(x)
-            root_y = self.find(y)
-            if root_x == root_y:
-                return False
-            
-            if self.rank[root_x] < self.rank[root_y]:
-                self.parent[root_x] = root_y
-            elif self.rank[root_x] > self.rank[root_y]:
-                self.parent[root_y] = root_x
-            else:
-                self.parent[root_y] = root_x
-                self.rank[root_x] += 1
-            
-            self.count -= 1  
-            return True
-        
-        def is_connected(self):
-            return self.count == 1
+    compute_prod=True
+    if self._n > self._MAX:
+      compute_prod = False  
+    for (_,_,w) in edges:
+      if w <= 0:
+        compute_prod = False
+        break
     
-    if not edges:
-        print("Warning: Empty edge list, no MST to compute")
-        self._min_sum[0] = 0
-        self._min_prod[0] = -1
-        self._ws.clear()
-        self._wp.clear()
-        return
+    all_vertices=set([u for (u,_,_) in edges]+[v for (_,v,_) in edges])
+    parent = {v:v for v in all_vertices}
+    rank = {v:0 for v in all_vertices}
+    def find(x):
+      if parent[x] != x:
+        parent[x] = find(parent[x])
+      return parent[x]
+    def union(x,y):
+      rx = find(x)
+      ry = find(y)
+      if rx == ry:
+        return False
+      if rank[rx] < rank[ry]:
+        parent[rx] = ry
+      elif rank[rx] > rank[ry]:
+        parent[ry] = rx
+      else:
+        parent[ry] = rx
+        rank[rx] += 1
+      return True
     
-    try:
-        n = self._n
-        max_node = max(max(edge[0], edge[1]) for edge in edges)
-        if max_node >= n:
-            print(f"Warning: Node index {max_node} exceeds expected count {n-1}, adjusting node count")
-            n = max_node + 1
-    except Exception as e:
-        print(f"Error validating edges: {e}")
-        n = self._n  
-    
-    try:
-        sorted_edges_by_sum = sorted(edges, key=lambda edge: edge[2])
-        
-        uf = UnionFind(n)
-        mst_sum_edges = [] 
-        self._ws.clear()   
-        
-        for edge in sorted_edges_by_sum:
-            u, v, w = edge
-            if uf.find(u) != uf.find(v):  
-                mst_sum_edges.append(edge)
-                self._ws.append(w) 
-                uf.union(u, v)
-                
-                if len(mst_sum_edges) == n - 1:
-                    break
-        
-        min_sum = sum(self._ws)
-        self._min_sum[0] = min_sum
-    except Exception as e:
-        print(f"Error computing minimum sum MST: {e}")
-        self._min_sum[0] = 0
-        self._ws.clear()
-    
-    all_positive = all(edge[2] > 0 for edge in edges)
-    
-    if self._n <= self._MAX and all_positive:
-        try:
-            self._wp.clear()
-            for w in self._ws:
-                self._wp.append(w)
+    edges_sorted = sorted(edges, key=lambda e: e[2])
+    self._ws.clear()
+    total_sum = 0
+    mst_edges_sum=[]
+    for (u,v,w) in edges_sorted:
+      if union(u,v):
+        total_sum += w
+        self._ws.append(w)
+        mst_edges_sum.append((u,v,w))
+      if len(mst_edges_sum) == len(all_vertices) - 1:
+        break
+    self._min_sum[0] = total_sum
 
-            min_prod = 1
-            for w in self._wp:
-                min_prod *= w
-                
-            self._min_prod[0] = min_prod
-        except Exception as e:
-            print(f"Error computing minimum product MST: {e}")
-            self._min_prod[0] = -1
-            self._wp.clear()
+    self._wp.clear()
+    if compute_prod:
+      parent = {v:v for v in all_vertices}
+      rank = {v:0 for v in all_vertices}
+      edges_by_log=sorted(edges, key=lambda e: math.log(e[2]))
+      total_prod = 1
+      mst_edges_prod=[]
+      for (u,v,w) in edges_by_log:
+        if union(u,v):
+          total_prod *= w
+          self._wp.append(w)
+          mst_edges_prod.append((u,v,w))
+        if len(mst_edges_prod) == len(all_vertices) - 1:
+          break
+      self._min_prod[0] = total_prod
     else:
-        self._min_prod[0] = -1
-        self._wp.clear()
-    
-    if self._show:
-        try:
-            output_graph = Graph(self._g.get_graph_type())
-            
-            for i in range(n):
-                d = Data(str(i))
-                output_graph._data_interface.insert(d)
-                output_graph.build_node_and_to_graph(i)
-            
-            for edge in mst_sum_edges:
-                u, v, w = edge
-                output_graph.add_edge(u, v, w)
-            
-            try:
-                output_graph.write_dot(out_file)
-                print(f"MST output graph is at: {out_file}")
-            except Exception as e:
-                print(f"Error writing dot file: {e}")
-        except Exception as e:
-            print(f"Error creating output graph: {e}")
+      self._min_prod[0] = -1
 
-  def _build_edge_data_struture_from_graph(self) -> "python list (from, to, weight)":
+    if (self._show):
+      out_graph=Graph(self._g.get_graph_type())
+      for u, v, _ in mst_edges_sum:
+        d_u = Data(str(u))
+        d_v = Data(str(v))
+        out_graph._data_interface.insert(d_u)
+        out_graph._data_interface.insert(d_v)
+      for u, v, w in mst_edges_sum:
+        out_graph.add_edge(u, v, w)
+      out_graph.write_dot(out_file)
+
+      for (u,v,w) in edges:
+        print(f"{u} {v}{w}")
+      
+      print(f"min_sum={self._min_sum[0]}")
+      print(f"min_prod={self._min_prod[0]}")
+      ws_str = ",".join(str(w) for w in self._ws)
+      wp_str = ",".join(str(w) for w in self._wp)
+      print(f"ws=[{ws_str}]")
+      print(f"wp=[{wp_str}]")
+      
+  def _build_edge_data_struture_from_graph(self)->"python list (from, to, weight)":
     edges = []
-    try:
-        node_list = self._g.list_of_nodes()
-        if not node_list:
-            print("Warning: Graph has no nodes")
-            return edges
-            
-        graphtype = self._g.get_graph_type()
-        
-        for node in node_list:
-            u = node.get_num()
-            for edge in node.all_fanout_edges_of_a_node():
-                v = edge.get_other_node().get_num()
-                w = edge.get_weight()
-                
-                if (graphtype == GraphType.UNDIRECTED or graphtype == GraphType.WEIGHTED_UNDIRECTED):
-                    if u < v:
-                        edges.append((u, v, w))
-                else:
-                    edges.append((u, v, w))
-        
-        print(f"Extracted {len(edges)} unique edges from graph")
-    except Exception as e:
-        print(f"Error extracting edges from graph: {e}")
-    
+    for node in self._g.list_of_nodes():
+      n = node.get_num()
+      for edge in node.all_fanout_edges_of_a_node():
+        v = edge.get_num()
+        w = edge.get_weight()
+        if self._g.is_undirected_graph():
+           if n < v:
+             edges.append((n,v,w))
+        else:
+           edges.append((n,v,w))
     return edges
+ 
+
 
 
 ############################################################
